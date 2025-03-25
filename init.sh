@@ -1,4 +1,11 @@
 #!/bin/bash
+# ------------------------------------------------------------------------------
+# Author: Delane Brandy
+# Email:  d.brandy@se21.qmul.ac.uk
+# Script: Kubernetes + Docker Init with WSL2 Handling
+# Description: Bootstraps a system with Docker, Kubernetes, and cri-dockerd,
+#              includes WSL2 detection, systemd setup, and system verification.
+# ------------------------------------------------------------------------------
 set -euo pipefail
 
 # Colors for log messages
@@ -9,10 +16,53 @@ NC='\033[0m'
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
+wsl2() {
+  if [[ -f /proc/sys/kernel/osrelease ]] && grep -q "microsoft-standard" /proc/sys/kernel/osrelease; then
+    if ! pidof systemd &>/dev/null; then
+      error "WSL2 detected, but systemd is not active."
+
+      # Ensure the file exists
+      if [[ ! -f /etc/wsl.conf ]]; then
+        info "Creating /etc/wsl.conf..."
+        touch /etc/wsl.conf
+      fi
+
+      # Only append systemd config if not already set
+      if ! grep -q "^\[boot\]" /etc/wsl.conf || ! grep -q "^systemd=true" /etc/wsl.conf; then
+        info "Enabling systemd in /etc/wsl.conf..."
+        echo -e "\n[boot]\nsystemd=true" >> /etc/wsl.conf
+      else
+        info "systemd is already enabled in /etc/wsl.conf."
+      fi
+
+      echo -e "${RED}Please reboot your WSL environment to apply systemd changes.${NC}"
+      echo -e "${YELLOW}Run: wsl --shutdown${NC}, then reopen your terminal and re-run this script."
+      exit 1
+    fi
+
+    info "WSL2 environment with systemd is active."
+    return 0
+  else
+    return 1
+  fi
+}
+
 # Ensure the script is run as root
 if [[ "$EUID" -ne 0 ]]; then
   error "Please run as root (e.g., sudo $0)"
   exit 1
+fi
+
+# WSL2-specific behavior
+if wsl2; then
+  info "Detected WSL2 environment – disabling swap..."
+  swapoff -a || true
+  sed -i '/ swap / s/^/#/' /etc/fstab || true
+else
+  info "Non-WSL2 environment – opening Kubernetes control plane ports..."
+  for port in 6443 2379 2380 10250 10259 10257; do
+    ufw allow "$port"/tcp || true
+  done
 fi
 
 info "Updating system package list..."
@@ -92,11 +142,12 @@ systemctl enable --now kubelet
 ################################################################################
 
 CRI_VERSION="0.3.16"
-ARCH="arm64"
+ARCH="$(dpkg --print-architecture)"  # Automatically detect architecture
 CRI_TAR="cri-dockerd-${CRI_VERSION}.${ARCH}.tgz"
 CRI_URL="https://github.com/Mirantis/cri-dockerd/releases/download/v${CRI_VERSION}/${CRI_TAR}"
 
-info "Downloading cri-dockerd version $CRI_VERSION..."
+info "Detected system architecture: ${ARCH}"
+info "Downloading cri-dockerd version $CRI_VERSION for $ARCH..."
 wget -q "$CRI_URL"
 
 if [[ -f "$CRI_TAR" ]]; then
