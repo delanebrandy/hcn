@@ -16,6 +16,15 @@ NC='\033[0m'
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
+# Ensure the script is run as root
+if [[ "$EUID" -ne 0 ]]; then
+  error "Please run as root (e.g., sudo $0)"
+  exit 1
+fi
+
+#Start Message
+info "Starting HCN Setup, installing dependencies..."
+
 wsl2() {
   if [[ -f /proc/sys/kernel/osrelease ]] && grep -q "microsoft-standard" /proc/sys/kernel/osrelease; then
     if ! pidof systemd &>/dev/null; then
@@ -46,12 +55,6 @@ wsl2() {
     return 1
   fi
 }
-
-# Ensure the script is run as root
-if [[ "$EUID" -ne 0 ]]; then
-  error "Please run as root (e.g., sudo $0)"
-  exit 1
-fi
 
 # WSL2-specific behavior
 if wsl2; then
