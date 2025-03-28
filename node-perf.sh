@@ -40,7 +40,13 @@ is_wsl2() {
 }
 
 get_gpu_vendor() {
-  lspci | grep -i 'vga' | awk -F: '{print $3}' | tr '[:upper:]' '[:lower:]'
+  if command -v nvidia-smi &>/dev/null; then
+    echo "nvidia"
+  elif command -v clinfo &>/dev/null && clinfo | grep -qi intel; then
+    echo "intel"
+  else
+    echo "unknown"
+  fi
 }
 
 info "Detecting GPU environment..."
@@ -166,14 +172,21 @@ fi
 # ------------------------------------------------------------------------------
 
 mkdir -p ./results
-LATEST_RESULT=$(phoronix-test-suite list-results | tail -1 | awk '{print $1}')
+info "Exporting all benchmark results to JSON..."
 
-if [[ -n "$LATEST_RESULT" ]]; then
-  info "Exporting result: $LATEST_RESULT"
-  phoronix-test-suite result-file-to-json "$LATEST_RESULT" > "./results/${LATEST_RESULT}.json"
-  info "Results saved to ./results/${LATEST_RESULT}.json"
-else
-  warn "No result found to export."
-fi
+for result in $(phoronix-test-suite list-results | awk '{print $1}'); do
+  if [[ -n "$result" ]]; then
+    phoronix-test-suite result-file-to-json "$result" > "./results/${result}.json"
+    info "→ Exported $result to ./results/${result}.json"
+  fi
+done
+
+info "All results exported to ./results/"
+
+info "Cleaning up temporary files..."
+rm -rf ~/.phoronix-test-suite/test-results/*
+rm -rf ~/.phoronix-test-suite/installed-tests/*
+rm -rf ~/.phoronix-test-suite/installed-packages/*
+rm -rf ~/.phoronix-test-suite/installed-tests-*
 
 info "Benchmarking complete!"
