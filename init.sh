@@ -48,34 +48,7 @@ wsl2() {
       echo -e "${YELLOW}Run: wsl --shutdown${NC}, then reopen your terminal and re-run this script."
       exit 1
     fi
-    # Enable mirrored networking mode
-    WIN_USER=$(cmd.exe /c "echo %USERNAME%" | tr -d '\r')
-    WIN_USER_PATH="/mnt/c/Users/$WIN_USER"
-    WSL_CONFIG="$WIN_USER_PATH/.wslconfig"
 
-    info "Detected Windows user: $WIN_USER"
-    info "Configuring mirrored networking mode in: $WSL_CONFIG"
-
-    mkdir -p "$WIN_USER_PATH"
-    if [[ -f "$WSL_CONFIG" ]]; then
-      warn ".wslconfig already exists. Updating networkingMode..."
-      if grep -q "networkingMode=" "$WSL_CONFIG"; then
-        sed -i 's/networkingMode=.*/networkingMode=mirrored/' "$WSL_CONFIG"
-      else
-        echo "networkingMode=mirrored" >> "$WSL_CONFIG"
-      fi
-    else
-      cat <<EOF > "$WSL_CONFIG"
-[wsl2]
-networkingMode=mirrored
-EOF
-    fi
-
-    info "✅ networkingMode=mirrored is now set."
-    info "Restarting WSL to apply changes..."
-    powershell.exe -Command "wsl --shutdown"
-
-    info "WSL2 environment with systemd is active."
     return 0
   else
     return 1
