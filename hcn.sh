@@ -8,11 +8,18 @@
 # ------------------------------------------------------------------------------
 set -e
 
+if [ -z "$1" ]; then
+    echo "Usage: $0 <control-node-ssh-key-password>"
+    exit 1
+fi
+
+SSH_KEY_PASSWORD=$1
+
 # Run node setup
 ./init.sh
 
+# Join HCN
+./join-hcn.sh "$SSH_KEY_PASSWORD"
+
 # Run benchmarks
 ./run-benchmarks.sh
-
-# Join HCN
-./join-hcn.sh
