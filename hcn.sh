@@ -1,19 +1,12 @@
 #!/bin/bash
-# ------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Author: Delane Brandy
 # Email:  d.brandy@se21.qmul.ac.uk
 # Script: Kubernetes + Docker Init with WSL2 Handling
 # Description: Bootstraps a system with Docker, Kubernetes, and cri-dockerd,
 #              includes WSL2 detection, systemd setup, and system verification.
-# ------------------------------------------------------------------------------
-set -e
-
-if [ -z "$1" ]; then
-    echo "Usage: $0 <control-node-ssh-key-password>"
-    exit 1
-fi
-
-SSH_PASSWORD=$1
+# -------------------------------------------------------------------------------
+set -euo pipefail
 
 # Detect if running in WSL2
 wsl2() {
@@ -38,7 +31,21 @@ get_ip() {
   else
     IP_ADDRESS="control-node.local"
   fi
+
+  if [[ -z "$IP_ADDRESS" ]]; then
+    error "Failed to retrieve IP address"
+    exit 1
+  fi
+
   export IP_ADDRESS
+}
+
+# Securely retrieve SSH password
+get_ssh_password() {
+  if [[ -z "${SSH_PASSWORD:-}" ]]; then
+    read -s -p "Enter SSH password: " SSH_PASSWORD
+    echo
+  fi
 }
 
 # Main Script Execution
@@ -48,24 +55,30 @@ info "Connecting to HCN, communicating with control node..."
 get_ip
 info "Control node IP: $IP_ADDRESS"
 
+# Securely retrieve SSH password
+get_ssh_password
+
 # Install sshpass if not installed
 info "Installing sshpass..."
 apt-get update -qq
 apt-get install -y sshpass
 
 # Copy sshkey from control node
-
 info "Copying SSH key from control node..."
 sshpass -p "$SSH_PASSWORD" scp "user@$IP_ADDRESS:~/.ssh/id_rsa" /root/.ssh/id_rsa
 
+# Restrict permissions for the SSH key
 chmod 600 /root/.ssh/id_rsa
 ssh-keyscan -H "$IP_ADDRESS" >> /root/.ssh/known_hosts
 
 # Run node setup
+info "Running node setup..."
 ./init.sh
 
 # Join HCN
+info "Joining HCN..."
 ./join-hcn.sh
 
 # Run benchmarks
+info "Running benchmarks..."
 ./run-benchmarks.sh
