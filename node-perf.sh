@@ -139,9 +139,8 @@ fi
 # ------------------------------------------------------------------------------
 
 info "Running CPU benchmarks..."
-phoronix-test-suite batch-benchmark compilation
-phoronix-test-suite batch-benchmark cryptography
-phoronix-test-suite batch-benchmark compression
+phoronix-test-suite batch-benchmark build-linux-kernel <<< 1
+#phoronix-test-suite batch-benchmark ffmpeg <<< 1
 
 # ------------------------------------------------------------------------------
 # Run GPU Benchmarks (Conditional)
@@ -150,16 +149,16 @@ phoronix-test-suite batch-benchmark compression
 info "Running GPU benchmarks (if supported)..."
 
 if [[ " ${SUPPORTED_PLATFORMS[*]} " =~ "opengl" ]]; then
-  phoronix-test-suite batch-benchmark opengl-demos
+  phoronix-test-suite batch-benchmark unigine-heaven
 fi
 if [[ " ${SUPPORTED_PLATFORMS[*]} " =~ "opencl" ]]; then
-  phoronix-test-suite batch-benchmark opencl
+  phoronix-test-suite batch-benchmark juliagpu  ##blender inteloptic
 fi
 if [[ " ${SUPPORTED_PLATFORMS[*]} " =~ "vulkan" ]]; then
-  phoronix-test-suite batch-benchmark vulkan
+  phoronix-test-suite batch-benchmark vkmark 
 fi
 if [[ " ${SUPPORTED_PLATFORMS[*]} " =~ "cuda" ]]; then
-  phoronix-test-suite batch-benchmark cuda
+  phoronix-test-suite batch-benchmark octanebench
 fi
 
 # ------------------------------------------------------------------------------
