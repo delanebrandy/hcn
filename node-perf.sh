@@ -183,6 +183,15 @@ done
 
 info "All results exported to ./results/"
 
+#send results to control node
+info "Sending results to control node..."
+
+scp -r ./results/* "$user@$IP_ADDRESS:~/benchmarks/"
+if [[ $? -ne 0 ]]; then
+  error "Failed to send results to control node."
+  exit 1
+fi
+
 info "Cleaning up temporary files..."
 rm -rf ~/.phoronix-test-suite/test-results/*
 rm -rf ~/.phoronix-test-suite/installed-tests/*

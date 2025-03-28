@@ -22,54 +22,11 @@ if [[ "$EUID" -ne 0 ]]; then
   exit 1
 fi
 
-# Check password argument
-if [[ $# -lt 1 ]]; then
-  error "Usage: $0 <SSH_PASSWORD>"
-  exit 1
-fi
-SSH_PASSWORD="$1"
 
-# Detect if running in WSL2
-wsl2() {
-  if [[ -f /proc/sys/kernel/osrelease ]] && grep -q "microsoft-standard" /proc/sys/kernel/osrelease; then
-    return 0
-  else
-    return 1
-  fi
-}
+# Copy join script and key from control node using scp sshkey 
+info "Fetching join script..."
 
-# Get IP address of control node
-get_ip() {
-  if wsl2; then
-    info "Detected WSL2 environment"
-    if powershell.exe python --version &>/dev/null; then
-      info "Python is installed on Windows"
-    else
-      info "Installing Python via winget on Windows..."
-      powershell.exe winget install --id Python.Python.3 --source winget
-    fi
-    IP_ADDRESS=$(powershell.exe python hostname.py raspberrypi | tr -d '\r')
-  else
-    IP_ADDRESS="control-node.local"
-  fi
-}
-
-# Main Script Execution
-info "Connecting to HCN, communicating with control node..."
-
-# Get control node IP
-get_ip
-info "Control node IP: $IP_ADDRESS"
-
-# Install sshpass if not installed
-info "Installing sshpass..."
-apt-get update -qq
-apt-get install -y sshpass
-
-# Copy join script and key from control node
-info "Fetching join script and SSH key..."
-sshpass -p "$SSH_PASSWORD" scp user@"$IP_ADDRESS":~/join-command.sh /tmp/join.sh
-sshpass -p "$SSH_PASSWORD" scp user@"$IP_ADDRESS":~/join-key /tmp/join-key
+scp "user@$IP_ADDRESS:~/join.sh" /tmp/join.sh 
 chmod +x /tmp/join.sh
 
 # Run join script
