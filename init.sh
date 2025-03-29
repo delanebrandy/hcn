@@ -153,7 +153,7 @@ info "Downloading cri-dockerd version $CRI_VERSION for $ARCH..."
 wget -q "$CRI_URL"
 
 if [[ -f "$CRI_TAR" ]]; then
-  tar xvf "$CRI_TAR"
+  tar xf "$CRI_TAR"
   mv ./cri-dockerd/cri-dockerd /usr/local/bin/
 else
   error "Failed to download cri-dockerd archive."

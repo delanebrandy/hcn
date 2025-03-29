@@ -41,8 +41,15 @@ is_wsl2() {
 
 get_gpu_vendor() {
   if command -v nvidia-smi &>/dev/null; then
-    echo "nvidia"
-  elif command -v clinfo &>/dev/null && clinfo | grep -qi intel; then
+    local name
+    name=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -n1 | tr '[:upper:]' '[:lower:]')
+    if echo "$name" | grep -q "nvidia"; then
+      echo "nvidia"
+      return
+    fi
+  fi
+
+  if command -v clinfo &>/dev/null && clinfo | grep -qi intel; then
     echo "intel"
   else
     echo "unknown"
@@ -84,7 +91,6 @@ if is_wsl2; then
     exit 0
   else
     warn "Unsupported GPU vendor in WSL2: $GPU_VENDOR"
-    exit 1
   fi
 
 else
@@ -117,16 +123,16 @@ fi
 # ------------------------------------------------------------------------------
 # Install Phoronix Test Suite
 # ------------------------------------------------------------------------------
-
+apt-get install -y php-cli php-xml unzip libelf-dev
 if ! command -v phoronix-test-suite &> /dev/null; then
   info "Installing Phoronix Test Suite..."
   apt-get install -y wget
   wget https://github.com/phoronix-test-suite/phoronix-test-suite/releases/download/v10.8.4/phoronix-test-suite-10.8.4.tar.gz
-  tar -xvf phoronix-test-suite-10.8.4.tar.gz
-  cd phoronix-test-suite-10.8.4
+  tar -xf phoronix-test-suite-10.8.4.tar.gz
+  cd phoronix-test-suite
   ./install-sh
   cd ..
-  rm -rf phoronix-test-suite-10.8.4*
+  rm -rf phoronix-test-suite*
 else
   info "Phoronix Test Suite already installed."
 fi
@@ -139,6 +145,8 @@ if [[ ! -f ~/.phoronix-test-suite/user-config.xml ]]; then
   info "Configuring Phoronix batch mode..."
   printf 'y\nn\nn\nn\nn\nn\nn\n' | phoronix-test-suite batch-setup
 fi
+
+sed -i 's|<DynamicRunCount>TRUE</DynamicRunCount>|<DynamicRunCount>FALSE</DynamicRunCount>|' ~/.phoronix-test-suite/user-config.xml
 
 # ------------------------------------------------------------------------------
 # Run CPU Benchmarks
@@ -166,36 +174,5 @@ fi
 if [[ " ${SUPPORTED_PLATFORMS[*]} " =~ "cuda" ]]; then
   phoronix-test-suite batch-benchmark octanebench
 fi
-
-# ------------------------------------------------------------------------------
-# Export Results to JSON
-# ------------------------------------------------------------------------------
-
-mkdir -p ./results
-info "Exporting all benchmark results to JSON..."
-
-for result in $(phoronix-test-suite list-results | awk '{print $1}'); do
-  if [[ -n "$result" ]]; then
-    phoronix-test-suite result-file-to-json "$result" > "./results/${result}.json"
-    info "→ Exported $result to ./results/${result}.json"
-  fi
-done
-
-info "All results exported to ./results/"
-
-#send results to control node
-info "Sending results to control node..."
-
-scp -r ./results/* "$user@$IP_ADDRESS:~/benchmarks/"
-if [[ $? -ne 0 ]]; then
-  error "Failed to send results to control node."
-  exit 1
-fi
-
-info "Cleaning up temporary files..."
-rm -rf ~/.phoronix-test-suite/test-results/*
-rm -rf ~/.phoronix-test-suite/installed-tests/*
-rm -rf ~/.phoronix-test-suite/installed-packages/*
-rm -rf ~/.phoronix-test-suite/installed-tests-*
 
 info "Benchmarking complete!"
