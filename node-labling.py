@@ -1,9 +1,21 @@
-# Author: Delane Brandy
-# Description: Dynamic performance labling of nodes in a hcn cluster
+#!/usr/bin/env python3
+"""
+label-node.py
+
+Author: Delane Brandy
+Email: d.brandy@se21.qmul.ac.uk
+
+Description:
+    Dynamically labels Kubernetes nodes in a Home Compute Network (HCN)
+    based on Phoronix benchmark results. Parses XML output and assigns
+    CPU and GPU capability labels along with platform support labels.
+"""
 
 import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
+import subprocess
+import argparse
 
 LABEL_MAP = {
     "build-linux-kernel": "cpu",
@@ -13,33 +25,93 @@ LABEL_MAP = {
     "juliagpu": "gpu-opencl",
 }
 
-results = {label: None for label in LABEL_MAP.values()}  # Initialize with nulls
-
-for xml in Path.home().glob(".phoronix-test-suite/test-results/*/composite.xml"):
-    try:
-        root = ET.parse(xml).getroot()
-        test_id = root.findtext("Result/Identifier")
-        if not test_id:
-            continue
-
-        short = test_id.split("/")[-1]         # e.g. build-linux-kernel-1.16.0
-        base = short.split("-")[0]             # e.g. build-linux-kernel
-        label = LABEL_MAP.get(base)
-        if not label:
-            continue
-
-        value = float(root.findtext("Result/Data/Entry/Value"))
-        results[label] = value
-
-    except Exception as e:
-        print(f"[!] Error parsing {xml}: {e}")
-        continue
-
-output = {
-    "node-performance": [results]
+# ----------------------- Threshold Configuration ------------------------------
+THRESHOLDS = {
+    "cpu": {"high": 60, "mid": 120},           # lower is better (seconds)
+    "gpu-vulkan": {"low": 20, "mid": 60},      # higher is better (FPS)
+    "gpu-opengl": {"low": 20, "mid": 60},
+    "gpu-cuda": {"low": 20, "mid": 60},
+    "gpu-opencl": {"low": 20, "mid": 60},
 }
 
-with open("node_performance.json", "w") as f:
-    json.dump(output, f, indent=2)
+# ------------------------- Classification Logic -------------------------------
+def classify(label, value):
+    if label == "cpu":
+        if value < THRESHOLDS[label]["high"]:
+            return "high"
+        elif value < THRESHOLDS[label]["mid"]:
+            return "mid"
+        else:
+            return "low"
+    else:
+        if value > THRESHOLDS[label]["mid"]:
+            return "high"
+        elif value > THRESHOLDS[label]["low"]:
+            return "mid"
+        else:
+            return "low"
 
-print("[✓] node_performance.json written")
+# ------------------------- Kubernetes Labeling --------------------------------
+def label_node(node, key, value):
+    print(f"[kubectl] Labeling {node}: {key}={value}")
+    subprocess.run(["kubectl", "label", "node", node, f"{key}={value}", "--overwrite"], check=True)
+
+# ------------------------- Benchmark Parsing ----------------------------------
+def parse_results():
+    results = {label: None for label in LABEL_MAP.values()}
+    platforms_supported = set()
+
+    for xml in Path.home().glob(".phoronix-test-suite/test-results/*/composite.xml"):
+        try:
+            root = ET.parse(xml).getroot()
+            test_id = root.findtext("Result/Identifier")
+            if not test_id:
+                continue
+
+            short = test_id.split("/")[-1]         # e.g. build-linux-kernel-1.16.0
+            base = short.split("-")[0]             # e.g. build-linux-kernel
+            label = LABEL_MAP.get(base)
+            if not label:
+                continue
+
+            value = float(root.findtext("Result/Data/Entry/Value"))
+            results[label] = value
+            platforms_supported.add(label)
+
+        except Exception as e:
+            print(f"[!] Error parsing {xml}: {e}")
+            continue
+
+    return results, platforms_supported
+
+# ------------------------------ Main Logic ------------------------------------
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--node", required=True, help="Kubernetes node name")
+    args = parser.parse_args()
+
+    node = args.node
+    results, platforms = parse_results()
+
+    # Save raw parsed data
+    with open("node_performance.json", "w") as f:
+        json.dump({"node-performance": [results]}, f, indent=2)
+
+    print("[✓] node_performance.json written")
+
+    for label, value in results.items():
+        if value is None:
+            print(f"[WARN] No result for {label}")
+            continue
+        perf_class = classify(label, value)
+        key = label.replace("gpu-", "gpu") if label.startswith("gpu-") else label
+        label_node(node, key, perf_class)
+
+    # Combine supported platforms into a single label
+    platforms_flat = [p.replace("gpu-", "") for p in platforms if p != "cpu"]
+    if platforms_flat:
+        platforms_string = ",".join(sorted(platforms_flat))
+        label_node(node, "platforms", platforms_string)
+
+if __name__ == "__main__":
+    main()
