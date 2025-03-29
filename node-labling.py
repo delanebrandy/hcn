@@ -5,7 +5,6 @@ import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-# Map known Phoronix test names to your desired output labels
 LABEL_MAP = {
     "build-linux-kernel": "cpu",
     "vkmark": "gpu-vulkan",
@@ -14,18 +13,17 @@ LABEL_MAP = {
     "juliagpu": "gpu-opencl",
 }
 
-results = {}
+results = {label: None for label in LABEL_MAP.values()}  # Initialize with nulls
 
-# Iterate over all composite.xml files in Phoronix results
 for xml in Path.home().glob(".phoronix-test-suite/test-results/*/composite.xml"):
     try:
         root = ET.parse(xml).getroot()
-        test_id = root.findtext("Result/Identifier")  # e.g. pts/octanebench-1.6.0
+        test_id = root.findtext("Result/Identifier")
         if not test_id:
             continue
 
-        short = test_id.split("/")[-1]                # e.g. octanebench-1.6.0
-        base = short.split("-")[0]                    # e.g. octanebench
+        short = test_id.split("/")[-1]         # e.g. build-linux-kernel-1.16.0
+        base = short.split("-")[0]             # e.g. build-linux-kernel
         label = LABEL_MAP.get(base)
         if not label:
             continue
@@ -37,12 +35,10 @@ for xml in Path.home().glob(".phoronix-test-suite/test-results/*/composite.xml")
         print(f"[!] Error parsing {xml}: {e}")
         continue
 
-# Wrap in array to match desired structure
 output = {
     "node-performance": [results]
 }
 
-# Save to JSON file
 with open("node_performance.json", "w") as f:
     json.dump(output, f, indent=2)
 
