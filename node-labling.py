@@ -1,21 +1,18 @@
-#!/usr/bin/env python3
-"""
-label-node.py
-
-Author: Delane Brandy
-Email: d.brandy@se21.qmul.ac.uk
-
-Description:
-    Dynamically labels Kubernetes nodes in a Home Compute Network (HCN)
-    based on Phoronix benchmark results. Parses XML output and assigns
-    CPU and GPU capability labels along with platform support labels.
-"""
+# label-node.py
+# ------------------------------------------------------------------------------
+# Author: Delane Brandy
+# Description: Dynamic performance labeling of nodes in a HCN cluster
+#              Combines XML benchmark parsing with Kubernetes node labeling.
+# ------------------------------------------------------------------------------
 
 import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
 import subprocess
 import argparse
+import platform
+import shutil
+import os
 
 LABEL_MAP = {
     "build-linux-kernel": "cpu",
@@ -84,6 +81,32 @@ def parse_results():
 
     return results, platforms_supported
 
+# --------------------------- System Info Detection ----------------------------
+def detect_arch():
+    return platform.machine().lower()
+
+def detect_gpu_vendor():
+    if shutil.which("nvidia-smi"):
+        return "nvidia"
+    elif shutil.which("clinfo"):
+        try:
+            out = subprocess.check_output("clinfo", stderr=subprocess.DEVNULL).decode().lower()
+            if "intel" in out:
+                return "intel"
+            elif "amd" in out:
+                return "amd"
+        except Exception:
+            pass
+    return "unknown"
+
+def has_battery():
+    try:
+        power_devices = subprocess.check_output(["upower", "-e"]).decode().splitlines()
+        return any("battery" in device for device in power_devices)
+    except Exception as e:
+        print(f"[WARN] Battery detection failed: {e}")
+        return False
+
 # ------------------------------ Main Logic ------------------------------------
 def main():
     parser = argparse.ArgumentParser()
@@ -112,6 +135,15 @@ def main():
     if platforms_flat:
         platforms_string = ",".join(sorted(platforms_flat))
         label_node(node, "platforms", platforms_string)
+
+    # Add architecture, vendor, and battery presence
+    arch = detect_arch()
+    vendor = detect_gpu_vendor()
+    has_batt = "true" if has_battery() else "false"
+
+    label_node(node, "arch", arch)
+    label_node(node, "vendor", vendor)
+    label_node(node, "has-battery", has_batt)
 
 if __name__ == "__main__":
     main()
