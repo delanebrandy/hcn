@@ -58,10 +58,10 @@ info "Control node IP: $IP_ADDRESS"
 # Securely retrieve SSH password
 get_ssh_password
 
-# Install sshpass if not installed
-info "Installing sshpass..."
+# Install dependencies
+info "Installing dependencies..."
 apt-get update -qq
-apt-get install -y sshpass
+apt-get install -y sshpass clinfo, upower
 
 # Copy sshkey from control node
 info "Copying SSH key from control node..."
