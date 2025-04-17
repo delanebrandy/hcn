@@ -61,7 +61,7 @@ get_ssh_password
 # Install dependencies
 info "Installing dependencies..."
 apt-get update -qq
-apt-get install -y sshpass clinfo, upower
+apt-get install -y sshpass clinfo, upower, python3
 
 # Copy sshkey from control node
 info "Copying SSH key from control node..."
@@ -79,6 +79,13 @@ info "Running node setup..."
 info "Joining HCN..."
 ./join-hcn.sh
 
+# Set up monitoring
+info "Setting up monitoring..."
+./setup-labelling.sh
+
 # Run benchmarks
 info "Running benchmarks..."
-./run-benchmarks.sh
+./node-perf.sh
+
+# Init static labelling
+python3 static_labelling.py

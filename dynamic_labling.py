@@ -1,4 +1,4 @@
-# monitor_idle_labels.py
+# dynamic_labelling.py
 # ------------------------------------------------------------
 # Continuously monitors system usage and battery status.
 # Updates Kubernetes node labels dynamically based on conditions:
@@ -18,7 +18,7 @@ UNLABEL_CMD = "kubectl label node {node} {key}-"
 
 # Configurable thresholds
 CPU_IDLE_THRESHOLD = 20  
-BATTERY_THRESHOLD = 80   
+BATTERY_THRESHOLD = 70   
 SAMPLE_INTERVAL = 60     
 
 

@@ -1,4 +1,4 @@
-# label-node.py
+# static_labeling.py
 # ------------------------------------------------------------------------------
 # Author: Delane Brandy
 # Description: Dynamic performance labeling of nodes in a HCN cluster
