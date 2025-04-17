@@ -63,6 +63,10 @@ info "Installing dependencies..."
 apt-get update -qq
 apt-get install -y sshpass clinfo, upower, python3
 
+info "Installing Python dependencies…"
+apt-get install -y python3-pip
+pip3 install -r requirements.txt
+
 # Copy sshkey from control node
 info "Copying SSH key from control node..."
 sshpass -p "$SSH_PASSWORD" scp "user@$IP_ADDRESS:~/.ssh/id_rsa" /root/.ssh/id_rsa
