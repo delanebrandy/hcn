@@ -21,7 +21,7 @@ info() { echo -e "\033[1;32m[INFO]\033[0m $*"; }
 error() { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
 
 SERVICE_NAME="dynamic-labelling.service"
-SCRIPT_NAME="dynamic_node_labelling.py"
+SCRIPT_NAME="dynamic_labelling.py"
 SCRIPT_PATH="/usr/local/bin/$SCRIPT_NAME"
 SERVICE_PATH="/etc/systemd/system/$SERVICE_NAME"
 
