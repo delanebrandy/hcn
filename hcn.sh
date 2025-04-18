@@ -15,6 +15,8 @@ NC='\033[0m'
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
+$USER =$(whoami) 
+
 # Ensure the script is run as root with --preserve-env=PATH
 if (( EUID )); then
   exec sudo --preserve-env=PATH "$0" "$@"
@@ -111,3 +113,11 @@ info "Running benchmarks..."
 
 # Init static labelling
 python3 static_labelling.py
+
+# Init dynamic labelling
+info "Setting up dynamic labelling..."
+if wsl2; then
+./setup-wsl-labelling.sh $USER $IP_ADDRESS $SSH_UNAME 
+else
+./setup-labelling.sh $USER $IP_ADDRESS $SSH_UNAME 
+fi

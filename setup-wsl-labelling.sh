@@ -15,7 +15,6 @@ fi
 IP_ADDRESS="$1"
 SSH_UNAME="$2"
 
-
 info() { echo -e "\033[1;32m[INFO]\033[0m $*"; }
 error() { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
 
@@ -41,7 +40,7 @@ Description=Dynamic Node Labelling Service
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 $SCRIPT_PATH $IP_ADDRESS $SSH_UNAME
+ExecStart=poweshell.exe python $SCRIPT_PATH $IP_ADDRESS $SSH_UNAME
 Restart=on-failure
 User=root
 Environment=PATH=/usr/bin:/usr/local/bin

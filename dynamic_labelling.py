@@ -12,6 +12,11 @@ import time
 import psutil
 import platform
 
+# SSH remote config – adjust these to your server
+SSH_USER = "your_user"
+SSH_HOST = "your.ssh.server"
+SSH_REMOTE = f"{SSH_USER}@{SSH_HOST}"
+
 NODE_NAME_CMD = ["hostname"]
 LABEL_CMD = "kubectl label node {node} {key}={value} --overwrite"
 UNLABEL_CMD = "kubectl label node {node} {key}-"
@@ -34,17 +39,22 @@ def is_plugged_in_and_sufficient():
 
 
 def is_cpu_idle():
+    print (f"[Monitor] CPU usage: {psutil.cpu_percent(interval=1)}%")
     return psutil.cpu_percent(interval=1) < CPU_IDLE_THRESHOLD
 
 
 def label_node(node, key, value):
-    cmd = LABEL_CMD.format(node=node, key=key, value=value)
-    subprocess.run(cmd.split(), check=True)
+    # build remote kubectl label command
+    remote_cmd = LABEL_CMD.format(node=node, key=key, value=value).split()
+    cmd = ["ssh", SSH_REMOTE] + remote_cmd
+    subprocess.run(cmd, check=True)
 
 
 def unlabel_node(node, key):
-    cmd = UNLABEL_CMD.format(node=node, key=key)
-    subprocess.run(cmd.split(), check=True)
+    # build remote kubectl unlabel command
+    remote_cmd = UNLABEL_CMD.format(node=node, key=key).split()
+    cmd = ["ssh", SSH_REMOTE] + remote_cmd
+    subprocess.run(cmd, check=True)
 
 
 def monitor():
