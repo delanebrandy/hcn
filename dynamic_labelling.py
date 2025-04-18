@@ -10,11 +10,15 @@
 import subprocess
 import time
 import psutil
-import platform
+import sys
 
-# SSH remote config – adjust these to your server
-SSH_USER = "your_user"
-SSH_HOST = "your.ssh.server"
+# Parse arguments for SSH info
+if len(sys.argv) != 3:
+    print("Usage: python dynamic_labelling.py <ssh_user> <ssh_host>")
+    sys.exit(1)
+    
+SSH_USER = sys.argv[1]
+SSH_HOST = sys.argv[2]
 SSH_REMOTE = f"{SSH_USER}@{SSH_HOST}"
 
 NODE_NAME_CMD = ["hostname"]
