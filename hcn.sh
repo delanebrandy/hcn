@@ -6,7 +6,19 @@
 # Description: Bootstraps a system with Docker, Kubernetes, and cri-dockerd,
 #              includes WSL2 detection, systemd setup, and system verification.
 # -------------------------------------------------------------------------------
-set -euo pipefail
+
+# Colors for log messages
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+info() { echo -e "${GREEN}[INFO]${NC} $*"; }
+error() { echo -e "${RED}[ERROR]${NC} $*"; }
+
+# Ensure the script is run as root with --preserve-env=PATH
+if (( EUID )); then
+  exec sudo --preserve-env=PATH "$0" "$@"
+fi
 
 # Detect if running in WSL2
 wsl2() {
@@ -40,14 +52,17 @@ get_ip() {
   export IP_ADDRESS
 }
 
-# Securely retrieve SSH password
-get_ssh_password() {
+get_control_info() {
+  if [[ -z "${SSH_UNAME:-}" ]]; then
+    read -p "Control Node's Username: " SSH_UNAME
+  fi
+
+  # Prompt for SSH password if not already set
   if [[ -z "${SSH_PASSWORD:-}" ]]; then
-    read -s -p "Enter SSH password: " SSH_PASSWORD
+    read -s -p "Enter password for $SSH_UNAME: " SSH_PASSWORD
     echo
   fi
 }
-
 # Main Script Execution
 info "Connecting to HCN, communicating with control node..."
 
@@ -56,20 +71,21 @@ get_ip
 info "Control node IP: $IP_ADDRESS"
 
 # Securely retrieve SSH password
-get_ssh_password
+get_control_info
 
 # Install dependencies
 info "Installing dependencies..."
 apt-get update -qq
-apt-get install -y sshpass clinfo, upower, python3
+apt-get upgrade -y -qq
+apt-get install -y -qq sshpass clinfo upower python3
 
 info "Installing Python dependencies…"
-apt-get install -y python3-pip
+apt-get install -y -qq python3-pip
 pip3 install -r requirements.txt
 
 # Copy sshkey from control node
 info "Copying SSH key from control node..."
-sshpass -p "$SSH_PASSWORD" scp "user@$IP_ADDRESS:~/.ssh/id_rsa" /root/.ssh/id_rsa
+sshpass -p "$SSH_PASSWORD" scp "$SSH_UNAME@$IP_ADDRESS:~/.ssh/id_rsa" /root/.ssh/id_rsa
 
 # Restrict permissions for the SSH key
 chmod 600 /root/.ssh/id_rsa
