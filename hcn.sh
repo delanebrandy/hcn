@@ -74,9 +74,11 @@ info "Control node IP: $IP_ADDRESS"
 get_control_info
 
 # Install dependencies
-info "Installing dependencies..."
+info "Updating and upgrading system packages..."
 apt-get update -qq
 apt-get upgrade -y -qq
+
+info "Installing dependencies..."
 apt-get install -y -qq sshpass clinfo upower python3
 
 info "Installing Python dependencies…"
