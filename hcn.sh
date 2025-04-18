@@ -79,10 +79,10 @@ apt-get update -qq
 apt-get upgrade -y -qq
 
 info "Installing dependencies..."
-apt-get install -y -qq sshpass clinfo upower python3
+apt-get install -y -qq sshpass clinfo upower 
 
 info "Installing Python dependencies…"
-apt-get install -y -qq python3-pip
+apt-get install -y -qq python3 python3-pip python3-venv python3-psutil
 pip3 install -r requirements.txt
 
 # Copy sshkey from control node
