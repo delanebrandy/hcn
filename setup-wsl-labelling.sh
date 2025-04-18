@@ -40,7 +40,7 @@ Description=Dynamic Node Labelling Service
 After=network.target
 
 [Service]
-ExecStart=poweshell.exe python $SCRIPT_PATH $IP_ADDRESS $SSH_UNAME
+ExecStart=poweshell.exe python $SCRIPT_PATH $SSH_UNAME $IP_ADDRESS
 Restart=on-failure
 User=root
 Environment=PATH=/usr/bin:/usr/local/bin

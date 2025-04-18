@@ -30,7 +30,6 @@ CPU_IDLE_THRESHOLD = 20
 BATTERY_THRESHOLD = 70   
 SAMPLE_INTERVAL = 60     
 
-
 def get_node_name():
     return subprocess.check_output(NODE_NAME_CMD).decode().strip()
 

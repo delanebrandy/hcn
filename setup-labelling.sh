@@ -41,7 +41,7 @@ Description=Dynamic Node Labelling Service
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 $SCRIPT_PATH $IP_ADDRESS $SSH_UNAME
+ExecStart=/usr/bin/python3 $SCRIPT_PATH $SSH_UNAME $IP_ADDRESS 
 Restart=on-failure
 User=root
 Environment=PATH=/usr/bin:/usr/local/bin
