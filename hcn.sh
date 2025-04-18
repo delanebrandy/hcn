@@ -99,7 +99,7 @@ info "Running node setup..."
 
 # Join HCN
 info "Joining HCN..."
-./join-hcn.sh
+./join-hcn.sh "$IP_ADDRESS" "$SSH_UNAME"
 
 # Set up monitoring
 info "Setting up monitoring..."

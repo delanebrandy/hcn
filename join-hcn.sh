@@ -22,11 +22,17 @@ if [[ "$EUID" -ne 0 ]]; then
   exit 1
 fi
 
+if [[ $# -ne 2 ]]; then
+  echo "Usage: $0 <control-plane-IP> <ssh-username>"
+  exit 1
+fi
+IP_ADDRESS="$1"
+SSH_UNAME="$2"
 
 # Copy join script and key from control node using scp sshkey 
 info "Fetching join script..."
 
-scp "user@$IP_ADDRESS:~/join.sh" /tmp/join.sh 
+sshpass -p "clai2003" scp "$SSH_UNAME@$IP_ADDRESS:~/join-command.sh" /tmp/join.sh  
 chmod +x /tmp/join.sh
 
 # Run join script
