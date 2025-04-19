@@ -15,7 +15,14 @@ NC='\033[0m'
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-$USER =$(whoami) 
+ORIG_USER="${SUDO_USER:-$USER}" 
+CONTROL_NODE=false
+
+#Check for --control-node flag
+if [[ "$1" == "--control-node" ]]; then
+  CONTROL_NODE=true
+  shift
+fi
 
 # Ensure the script is run as root with --preserve-env=PATH
 if (( EUID )); then
@@ -65,59 +72,74 @@ get_control_info() {
     echo
   fi
 }
+
+ssh_setup() {
+  info "Connecting to HCN, communicating with control node..."
+
+  # Get control node IP
+  get_ip
+  info "Control node IP: $IP_ADDRESS"
+
+  # Securely retrieve SSH password
+  get_control_info
+
+  # Copy sshkey from control node
+  info "Copying SSH key from control node..."
+  sshpass -p "$SSH_PASSWORD" scp "$SSH_UNAME@$IP_ADDRESS:~/.ssh/id_rsa" /root/.ssh/id_rsa
+
+  # Restrict permissions for the SSH key
+  chmod 600 /root/.ssh/id_rsa
+  ssh-keyscan -H "$IP_ADDRESS" >> /root/.ssh/known_hosts
+}
+
 # Main Script Execution
-info "Connecting to HCN, communicating with control node..."
+main() {
 
-# Get control node IP
-get_ip
-info "Control node IP: $IP_ADDRESS"
+  info "Starting HCN Setup"
+  # Install dependencies
+  info "Updating and upgrading system packages..."
+  apt-get update -qq
+  apt-get upgrade -y -qq
 
-# Securely retrieve SSH password
-get_control_info
+  info "Installing dependencies..."
+  apt-get install -y -qq sshpass clinfo upower openssh-client openssh-server
 
-# Install dependencies
-info "Updating and upgrading system packages..."
-apt-get update -qq
-apt-get upgrade -y -qq
+  info "Installing Python dependencies…"
+  apt-get install -y -qq python3 python3-pip python3-venv python3-psutil
+  #pip3 install -r requirements.txt
 
-info "Installing dependencies..."
-apt-get install -y -qq sshpass clinfo upower 
 
-info "Installing Python dependencies…"
-apt-get install -y -qq python3 python3-pip python3-venv python3-psutil
-pip3 install -r requirements.txt
+  # Run node setup
+  info "Running node setup..."
+  if $CONTROL_NODE; then
+    ./init-control.sh
+  else
+    ssh_setup
+    ./init.sh
 
-# Copy sshkey from control node
-info "Copying SSH key from control node..."
-sshpass -p "$SSH_PASSWORD" scp "$SSH_UNAME@$IP_ADDRESS:~/.ssh/id_rsa" /root/.ssh/id_rsa
+    # Join HCN
+    info "Joining HCN..."
+    ./join-hcn.sh "$IP_ADDRESS" "$SSH_UNAME"
+  fi
 
-# Restrict permissions for the SSH key
-chmod 600 /root/.ssh/id_rsa
-ssh-keyscan -H "$IP_ADDRESS" >> /root/.ssh/known_hosts
+  # Set up monitoring
+  info "Setting up monitoring..."
+  ./setup-labelling.sh
 
-# Run node setup
-info "Running node setup..."
-./init.sh
+  # Run benchmarks
+  info "Running benchmarks..."
+  ./node-perf.sh
 
-# Join HCN
-info "Joining HCN..."
-./join-hcn.sh "$IP_ADDRESS" "$SSH_UNAME"
+  # Init static labelling
+  python3 static_labelling.py
 
-# Set up monitoring
-info "Setting up monitoring..."
-./setup-labelling.sh
+  # Init dynamic labelling
+  info "Setting up dynamic labelling..."
+  if wsl2; then
+  ./setup-wsl-labelling.sh $ORIG_USER $IP_ADDRESS $SSH_UNAME 
+  else
+  ./setup-labelling.sh $ORIG_USER $IP_ADDRESS $SSH_UNAME 
+  fi
+}
 
-# Run benchmarks
-info "Running benchmarks..."
-./node-perf.sh
-
-# Init static labelling
-python3 static_labelling.py
-
-# Init dynamic labelling
-info "Setting up dynamic labelling..."
-if wsl2; then
-./setup-wsl-labelling.sh $USER $IP_ADDRESS $SSH_UNAME 
-else
-./setup-labelling.sh $USER $IP_ADDRESS $SSH_UNAME 
-fi
+main "$@"

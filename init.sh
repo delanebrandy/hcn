@@ -57,11 +57,11 @@ wsl2() {
 
 # WSL2-specific behavior
 if wsl2; then
-  info "Detected WSL2 environment – disabling swap..."
+  info "Detected WSL2 environment - disabling swap..."
   swapoff -a || true
   sed -i '/ swap / s/^/#/' /etc/fstab || true
 else
-  info "Non-WSL2 environment – opening Kubernetes control plane ports..."
+  info "Non-WSL2 environment - opening Kubernetes control plane ports..."
   for port in 6443 2379 2380 10250 10259 10257; do
     ufw allow "$port"/tcp || true
   done
