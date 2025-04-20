@@ -64,7 +64,11 @@ get_ip() {
     fi
     IP_ADDRESS=$(powershell.exe python hostname.py $HCN_HOSTNAME | tr -d '\r')
   else
-    IP_ADDRESS=$HCN_HOSTNAME
+    if [[ "$HCN_HOSTNAME" != *".local" ]]; then
+      IP_ADDRESS="${HCN_HOSTNAME}.local"
+    else
+      IP_ADDRESS="$HCN_HOSTNAME"
+    fi
   fi
 
   if [[ -z "$IP_ADDRESS" ]]; then
