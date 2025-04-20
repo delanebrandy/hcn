@@ -21,4 +21,5 @@ spec:
       restartPolicy: Never
       volumes:
       - name: ccache
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: hcn-nfs-pvc
