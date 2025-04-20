@@ -1,0 +1,41 @@
+# distcc-server-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distcc-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: distcc
+  template:
+    metadata:
+      labels:
+        app: distcc
+    spec:
+      containers:
+      - name: distcc
+        image: ghcr.io/yourname/distcc-ccache:latest
+        ports:
+        - containerPort: 3632
+        env:
+        - name: CCACHE_DIR
+          value: /ccache
+        volumeMounts:
+        - name: ccache
+          mountPath: /ccache
+      volumes:
+      - name: ccache
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: distcc-headless
+spec:
+  clusterIP: None
+  selector:
+    app: distcc
+  ports:
+  - port: 3632
+    targetPort: 3632

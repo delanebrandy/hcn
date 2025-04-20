@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: distcc-client-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: client
+        image: ghcr.io/yourname/distcc-ccache:latest
+        command: ["/bin/bash", "-c"]
+        args:
+        - |
+          ./generate_distcc_hosts.sh make -j16 CC="distcc gcc"
+        env:
+        - name: CCACHE_DIR
+          value: /ccache
+        volumeMounts:
+        - name: ccache
+          mountPath: /ccache
+      restartPolicy: Never
+      volumes:
+      - name: ccache
+        emptyDir: {}
