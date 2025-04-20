@@ -76,3 +76,9 @@ exportfs -a
 systemctl restart nfs-kernel-server
 
 info "NFS setup complete. $DEVICE is now shared at $MOUNT_POINT to $NETWORK_RANGE"
+
+info "Setting up PV and PVC for NFS..."
+kubectl apply -f nfs-pv.yaml
+kubectl apply -f nfs-pvc.yaml
+
+info "NFS PV and PVC created successfully."

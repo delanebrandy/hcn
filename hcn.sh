@@ -160,10 +160,10 @@ main() {
   if $NET_DRIVE; then
     if $CONTROL_NODE; then
       info "Setting up NFS share at $NFS_PATH..."
-      ./setup-storage.sh "$NFS_PATH"
+      ./storage/setup-storage.sh "$NFS_PATH"
     else
       info "Joining NFS share at $NFS_PATH..."
-      ./join-storage.sh "$NFS_PATH"
+      ./storage/join-storage.sh "$NFS_PATH"
     fi
   fi
 
