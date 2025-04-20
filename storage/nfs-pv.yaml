@@ -10,4 +10,4 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   nfs:
     server: 10.0.0.1
-    path: /mnt/shared_storage
+    path: /mnt/shared_drive

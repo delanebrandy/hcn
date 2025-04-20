@@ -62,7 +62,7 @@ chown -R nobody:nogroup "$MOUNT_POINT"
 chmod -R 755 "$MOUNT_POINT"
 
 # Configure /etc/exports
-EXPORT_LINE="$MOUNT_POINT $NETWORK_RANGE(rw,sync,no_subtree_check,insecure)"
+EXPORT_LINE="$MOUNT_POINT $NETWORK_RANGE(rw,sync,no_subtree_check,no_root_squash,insecure)"
 if ! grep -Fxq "$EXPORT_LINE" /etc/exports; then
   info "Adding NFS export to /etc/exports..."
   echo "$EXPORT_LINE" >> /etc/exports

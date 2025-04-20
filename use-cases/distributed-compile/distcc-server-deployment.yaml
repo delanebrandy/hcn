@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
       - name: distcc
-        image: ghcr.io/yourname/distcc-ccache:latest
+        image: distcc-ccache:local
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3632
         env:

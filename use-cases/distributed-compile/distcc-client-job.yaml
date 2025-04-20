@@ -7,11 +7,12 @@ spec:
     spec:
       containers:
       - name: client
-        image: ghcr.io/yourname/distcc-ccache:latest
+        image: distcc-ccache:local
+        imagePullPolicy: IfNotPresent
         command: ["/bin/bash", "-c"]
         args:
         - |
-          ./generate_distcc_hosts.sh make -j16 CC="distcc gcc"
+          /usr/local/bin/generate_distcc_hosts.sh make -j16 CC="distcc gcc"
         env:
         - name: CCACHE_DIR
           value: /ccache
