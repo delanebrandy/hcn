@@ -24,10 +24,6 @@ fi
 info "Building Docker image: distcc-ccache:local"
 docker build -t distcc-ccache:local .
 
-info "Applying NFS PersistentVolume and PersistentVolumeClaim..."
-kubectl apply -f nfs-pv.yaml
-kubectl apply -f nfs-pvc.yaml
-
 info "Deploying distcc server and service..."
 kubectl apply -f distcc-server-deployment.yaml
 
