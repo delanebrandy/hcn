@@ -27,7 +27,7 @@ if [[ "$1" == "--force" ]]; then
 fi
 
 # Start Message
-info "Starting HCN Setup for control plane, installing dependencies..."
+info "Starting HCN Setup for control plane"
 
 wsl2() {
   if [[ -f /proc/sys/kernel/osrelease ]] && grep -q "microsoft-standard" /proc/sys/kernel/osrelease; then
@@ -45,6 +45,9 @@ if wsl2 || $force; then
 fi
 
 ## Common init steps
+info "Installing dependencies..."
+apt-get install -y -qq openssh-server 
+
 ./init.sh
 
 ## Generate SSH key
@@ -54,3 +57,6 @@ ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa
 kubeadm token create --ttl 0 --print-join-command > ~/join-command.sh
 echo " --cri-socket unix:///var/run/docker.sock" >> ~/join-command.sh
 chmod +x ~/join-command.sh
+
+## Create NFS share if available
+./setup-storage.sh

@@ -16,12 +16,29 @@ error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
 ORIG_USER="${SUDO_USER:-$USER}" 
 CONTROL_NODE=false
+NET_DRIVE=false
+NFS_PATH="/mnt/shared_drive"
 
 #Check for --control-node flag
-if [[ "$1" == "--control-node" ]]; then
-  CONTROL_NODE=true
-  shift
-fi
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --control-node)
+      CONTROL_NODE=true
+      shift
+      ;;
+    --net-drive)
+      NET_DRIVE=true
+      shift
+      if [[ -n "$1" && "$1" != --* ]]; then
+        NFS_PATH="$1"
+        shift
+      fi
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
 
 # Ensure the script is run as root with --preserve-env=PATH
 if (( EUID )); then
@@ -101,7 +118,7 @@ main() {
   apt-get upgrade -y -qq
 
   info "Installing dependencies..."
-  apt-get install -y -qq sshpass clinfo upower openssh-client openssh-server
+  apt-get install -y -qq sshpass clinfo upower
 
   info "Installing Python dependencies…"
   apt-get install -y -qq python3 python3-pip python3-venv python3-psutil
@@ -139,6 +156,17 @@ main() {
   else
   ./setup-labelling.sh $ORIG_USER $IP_ADDRESS $SSH_UNAME 
   fi
+
+  if $NET_DRIVE; then
+    if $CONTROL_NODE; then
+      info "Setting up NFS share at $NFS_PATH..."
+      ./setup-storage.sh "$NFS_PATH"
+    else
+      info "Joining NFS share at $NFS_PATH..."
+      ./join-storage.sh "$NFS_PATH"
+    fi
+  fi
+
 }
 
 main "$@"

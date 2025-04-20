@@ -69,7 +69,7 @@ fi
 
 
 info "Installing prerequisites..."
-apt-get install -y -qq apt-transport-https ca-certificates curl gnupg lsb-release
+apt-get install -y -qq apt-transport-https ca-certificates curl gnupg lsb-release openssh-client
 
 ################################################################################
 # Docker Installation
