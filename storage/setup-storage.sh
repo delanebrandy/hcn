@@ -38,8 +38,8 @@ fi
 
 info "Installing dependencies..."
 apt-get update -qq
-apt-get install -y ipcalc
-apt-get install -y nfs-kernel-server
+apt-get install -y -qq ipcalc
+apt-get install -y -qq nfs-kernel-server
 
 
 NETWORK_RANGE=$(ipcalc -n "$ETH_IP" | grep Network | awk '{print $2}')

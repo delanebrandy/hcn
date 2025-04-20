@@ -64,7 +64,7 @@ if is_wsl2; then
   if echo "$GPU_VENDOR" | grep -qi "nvidia"; then
     info "NVIDIA GPU detected in WSL2. Installing CUDA + Vulkan support..."
     apt-get update
-    apt-get install -y build-essential software-properties-common \
+    apt-get install -y -qq build-essential software-properties-common \
       mesa-vulkan-drivers mesa-utils vulkan-tools \
       cuda-toolkit-12-3 libvulkan1
 
@@ -75,13 +75,13 @@ if is_wsl2; then
   elif echo "$GPU_VENDOR" | grep -qi "intel"; then
     info "Intel GPU detected in WSL2. Installing OpenCL + Vulkan (Dozen) support..."
     apt-get update
-    apt-get install -y gpg-agent wget
+    apt-get install -y -qq gpg-agent wget
     wget -qO - https://repositories.intel.com/graphics/intel-graphics.key | \
       gpg --dearmor -o /usr/share/keyrings/intel-graphics.gpg
     echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/intel-graphics.gpg] https://repositories.intel.com/graphics/ubuntu focal-devel main' \
       > /etc/apt/sources.list.d/intel.gpu.focal.list
     apt-get update
-    apt-get install -y \
+    apt-get install -y -qq \
       intel-opencl-icd intel-level-zero-gpu level-zero \
       mesa-vulkan-drivers vulkan-tools clinfo
 
@@ -122,10 +122,10 @@ fi
 # ------------------------------------------------------------------------------
 # Install Phoronix Test Suite
 # ------------------------------------------------------------------------------
-apt-get install -y php-cli php-xml unzip libelf-dev
+apt-get install -y -qq php-cli php-xml unzip libelf-dev
 if ! command -v phoronix-test-suite &> /dev/null; then
   info "Installing Phoronix Test Suite..."
-  apt-get install -y wget
+  apt-get install -y -qq wget
   wget https://github.com/phoronix-test-suite/phoronix-test-suite/releases/download/v10.8.4/phoronix-test-suite-10.8.4.tar.gz
   tar -xf phoronix-test-suite-10.8.4.tar.gz
   cd phoronix-test-suite

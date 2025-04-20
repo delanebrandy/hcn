@@ -3,7 +3,7 @@ FROM ubuntu:22.04
 
 # Install build tools and required packages
 RUN apt-get update && \
-    apt-get install -y build-essential distcc ccache make curl && \
+    apt-get install -y -qq build-essential distcc ccache make curl && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create ccache directory
