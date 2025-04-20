@@ -2,9 +2,8 @@
 # ------------------------------------------------------------------------------
 # Author: Delane Brandy
 # Email:  d.brandy@se21.qmul.ac.uk
-# Script: Node Performance Benchmarking Script with GPU Support (WSL2 & Bare Metal)
-# Description: Installs Phoronix Test Suite, detects environment (WSL2/bare metal),
-#              installs appropriate GPU drivers, runs CPU/GPU benchmarks, and exports results.
+# Script: EDIT
+# Description: EDIT
 # ------------------------------------------------------------------------------
 
 set -euo pipefail

@@ -4,7 +4,7 @@
 # Updates Kubernetes node labels dynamically based on conditions:
 # - CPU usage below threshold
 # - Plugged in or battery level > 80%
-# Applies or removes `idle=true` label accordingly.
+# Modifies`idle=true` taint on the control plane.
 # ------------------------------------------------------------
 
 import subprocess

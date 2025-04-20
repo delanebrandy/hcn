@@ -2,9 +2,8 @@
 # ------------------------------------------------------------------------------
 # Author: Delane Brandy
 # Email:  d.brandy@se21.qmul.ac.uk
-# Script: Kubernetes + Docker Init with WSL2 Handling
-# Description: Bootstraps a system with Docker, Kubernetes, and cri-dockerd,
-#              includes WSL2 detection, systemd setup, and system verification.
+# Script: EDIT
+# Description: EDIT
 # ------------------------------------------------------------------------------
 
 # Colors for log messages
