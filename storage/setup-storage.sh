@@ -77,6 +77,15 @@ systemctl restart nfs-kernel-server
 
 info "NFS setup complete. $DEVICE is now shared at $MOUNT_POINT to $NETWORK_RANGE"
 
+info "Updating nfs-pv.yaml with NFS server IP..."
+
+NFS_IP=$(hostname -I | awk '{print $1}')
+info "Detected local IP: $NFS_IP"
+
+# In-place replacement of the server line
+sed -i "s/^\(\s*server:\s*\).*/\1${NFS_IP}/" nfs-pv.yaml
+info "nfs-pv.yaml patched with IP: $NFS_IP"
+
 info "Setting up PV and PVC for NFS..."
 kubectl apply -f nfs-pv.yaml
 kubectl apply -f nfs-pvc.yaml

@@ -21,8 +21,16 @@ if [[ "$EUID" -ne 0 ]]; then
   exit 1
 fi
 
-info "Building Docker image: distcc-ccache:local"
-docker build -t distcc-ccache:local .
+IMAGE_NAME="distcc-ccache:local"
+
+# Check if the image already exists
+if docker image inspect "$IMAGE_NAME" &>/dev/null; then
+  info "Image '$IMAGE_NAME' already exists - skipping build."
+else
+  info "Image '$IMAGE_NAME' not found - building now..."
+  docker build -t "$IMAGE_NAME" .
+  info "Image '$IMAGE_NAME' built successfully."
+fi
 
 info "Deploying distcc server and service..."
 kubectl apply -f distcc-server-deployment.yaml
