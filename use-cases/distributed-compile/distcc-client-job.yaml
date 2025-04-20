@@ -13,7 +13,7 @@ spec:
         args:
         - |
           cd /tmp &&
-          apt update && apt install -y curl make gcc &&
+          apt-get update && apt-get install -y curl make gcc &&
           curl -LO https://zlib.net/zlib-1.2.13.tar.gz &&
           tar xzf zlib-1.2.13.tar.gz &&
           cd zlib-1.2.13 &&

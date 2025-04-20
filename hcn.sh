@@ -52,6 +52,8 @@ wsl2() {
 
 # Get IP address of control node
 get_ip() {
+  read -p "Enter Control Planes's hostname: " HCN_HOSTNAME
+
   if wsl2; then
     info "Detected WSL2 environment"
     if powershell.exe python --version &>/dev/null; then
@@ -60,9 +62,9 @@ get_ip() {
       info "Installing Python via winget on Windows..."
       powershell.exe winget install --id Python.Python.3 --source winget
     fi
-    IP_ADDRESS=$(powershell.exe python hostname.py raspberrypi | tr -d '\r')
+    IP_ADDRESS=$(powershell.exe python hostname.py $HCN_HOSTNAME | tr -d '\r')
   else
-    IP_ADDRESS="control-node.local"
+    IP_ADDRESS=$HCN_HOSTNAME
   fi
 
   if [[ -z "$IP_ADDRESS" ]]; then
