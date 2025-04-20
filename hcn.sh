@@ -29,10 +29,6 @@ while [[ $# -gt 0 ]]; do
     --net-drive)
       NET_DRIVE=true
       shift
-      if [[ -n "$1" && "$1" != --* ]]; then
-        NFS_PATH="$1"
-        shift
-      fi
       ;;
     *)
       break
@@ -159,11 +155,11 @@ main() {
 
   if $NET_DRIVE; then
     if $CONTROL_NODE; then
-      info "Setting up NFS share at $NFS_PATH..."
-      ./storage/setup-storage.sh "$NFS_PATH"
+      info "Setting up NFS share at $IP_ADDRESS..."
+      ./storage/setup-storage.sh "$IP_ADDRESS"
     else
-      info "Joining NFS share at $NFS_PATH..."
-      ./storage/join-storage.sh "$NFS_PATH"
+      info "Joining NFS share at $IP_ADDRESS..."
+      ./storage/join-storage.sh "$IP_ADDRESS"
     fi
   fi
 
