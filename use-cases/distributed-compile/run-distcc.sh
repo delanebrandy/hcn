@@ -21,24 +21,16 @@ if [[ "$EUID" -ne 0 ]]; then
   exit 1
 fi
 
-IMAGE_NAME="distcc-ccache:local"
+IMAGE="registry.registry.svc.cluster.local:5000/distcc:latest"
 
-# Check if the image already exists
-if docker image inspect "$IMAGE_NAME" &>/dev/null; then
-  info "Image '$IMAGE_NAME' already exists - skipping build."
-else
-  info "Image '$IMAGE_NAME' not found - building now..."
-  docker build -t "$IMAGE_NAME" .
-  info "Image '$IMAGE_NAME' built successfully."
-fi
+info "Building distcc server image..."
+docker build -t "$IMAGE" .
 
-info "Deploying distcc server and service..."
-kubectl apply -f distcc-server-deployment.yaml
+info "Pushing to registry..."
+docker push "$IMAGE"
 
-info "Waiting for distcc server pods to become ready..."
-kubectl wait --for=condition=ready pod -l app=distcc --timeout=60s
+info "Deploying DaemonSet..."
+kubectl apply -f distcc-daemonset.yaml
+kubectl apply -f distcc-headless.yaml
 
-info "Launching distcc client job..."
-kubectl apply -f distcc-client-job.yaml
-
-info "Build and deployment process complete."
+info "All distcc daemons should now be running on each node."

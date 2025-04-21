@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: distcc
+  namespace: devtools
+  labels:
+    app: distcc
+spec:
+  selector:
+    matchLabels:
+      app: distcc
+  template:
+    metadata:
+      labels:
+        app: distcc
+    spec:
+      containers:
+      - name: distccd
+        image: registry.registry.svc.cluster.local:5000/distcc:latest
+        ports:
+        - containerPort: 3632
+          hostPort: 3632
+          protocol: TCP
+        env:
+        - name: ALLOW
+          value: "10.0.0.0/8"

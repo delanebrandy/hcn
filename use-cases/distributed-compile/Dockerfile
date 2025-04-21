@@ -1,27 +1,17 @@
-# Base image
-FROM ubuntu:22.04
 
-# Install build tools and required packages
-RUN apt-get update && \
-    apt-get install -y -qq build-essential distcc ccache make curl && \
+FROM ubuntu:18.04                                     
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -q && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -q \
+      distcc gcc g++ clang && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create ccache directory
-RUN mkdir -p /ccache && chmod 777 /ccache
 
-# Copy in the distcc host generation script
-COPY generate_distcc_hosts.sh /usr/local/bin/generate_distcc_hosts.sh
-RUN chmod +x /usr/local/bin/generate_distcc_hosts.sh
+ENV ALLOW 10.0.0.0/8
 
-# Set environment variables for ccache and distcc
-ENV PATH="/usr/lib/ccache:$PATH"
-ENV CCACHE_DIR=/ccache
-ENV CC="ccache distcc gcc"
-ENV CXX="ccache distcc g++"
-ENV DISTCC_VERBOSE=1
+RUN useradd --no-create-home distcc
+USER distcc
 
-# Expose distcc's default port
 EXPOSE 3632
 
-# Start distcc server by default
-CMD ["distccd", "--daemon", "--no-detach", "--allow", "0.0.0.0/0"]
+CMD ["distccd","--no-detach","--daemon","--jobs","$(nproc)","--allow","${ALLOW}","--log-stderr"] 

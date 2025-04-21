@@ -86,8 +86,7 @@ info "Detected local IP: $NFS_IP"
 sed -i "s/^\(\s*server:\s*\).*/\1${NFS_IP}/" nfs-pv.yaml
 info "nfs-pv.yaml patched with IP: $NFS_IP"
 
-info "Setting up PV and PVC for NFS..."
-kubectl apply -f nfs-pv.yaml
-kubectl apply -f nfs-pvc.yaml
+info "Setting up PV, PVC, and Registry"
+kubectl apply -f .
 
 info "NFS PV and PVC created successfully."
