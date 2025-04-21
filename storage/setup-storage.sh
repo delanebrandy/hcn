@@ -87,6 +87,10 @@ sed -i "s/^\(\s*server:\s*\).*/\1${NFS_IP}/" nfs-pv.yaml
 info "nfs-pv.yaml patched with IP: $NFS_IP"
 
 info "Setting up PV, PVC, and Registry"
-kubectl apply -f .
+kubectl apply -f registry-namespace.yaml \
+              -f registry-deployment.yaml \
+              -f registry-service.yaml \
+              -f nfs-pv.yaml \
+              -f nfs-pvc.yaml
 
 info "NFS PV and PVC created successfully."

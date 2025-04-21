@@ -1,11 +1,9 @@
-
-FROM ubuntu:18.04                                     
+FROM ubuntu:22.04                                  
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -q && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y -q \
       distcc gcc g++ clang && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
-
 
 ENV ALLOW 10.0.0.0/8
 

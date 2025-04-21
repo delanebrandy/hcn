@@ -10,7 +10,6 @@
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 
 # Check for IP argument
@@ -22,11 +21,8 @@ fi
 SERVER_IP="$1"
 MOUNT_POINT="/mnt/shared_drive"
 
-
-
 info "Installing NFS client..."
 apt-get -y -qq install nfs-common
-
 
 info "Creating mount point..."
 mkdir -p $MOUNT_POINT 
