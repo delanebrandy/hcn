@@ -104,12 +104,9 @@ ssh_setup() {
   # Copy sshkey from control node
   info "Copying SSH key from control node..."
   mkdir -p /root/.ssh
-  ssh-keyscan -H "$IP_ADDRESS" >> /root/.ssh/known_hosts
+  ssh-keyscan -t rsa -H "$IP_ADDRESS" >> /root/.ssh/known_hosts
   sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no "$SSH_UNAME@$IP_ADDRESS:~/.ssh/id_rsa" /root/.ssh/id_rsa
-
-  # Restrict permissions for the SSH key
   chmod 600 /root/.ssh/id_rsa
-  ssh-keyscan -H "$IP_ADDRESS" >> /root/.ssh/known_hosts
 }
 
 # Main Script Execution
