@@ -31,7 +31,7 @@ SSH_UNAME="$2"
 # Copy join script and key from control node using scp sshkey 
 info "Fetching join script..."
 
-sshpass -p "clai2003" scp "$SSH_UNAME@$IP_ADDRESS:~/join-command.sh" /tmp/join.sh  
+scp "$SSH_UNAME@$IP_ADDRESS:~/join-command.sh" /tmp/join.sh  
 chmod +x /tmp/join.sh
 
 # Run join script
@@ -53,3 +53,8 @@ else
   error "Node is not ready."
   exit 1
 fi
+
+mkdir -p ~/.kube
+scp "$SSH_UNAME@$IP_ADDRESS:~/.kube/config ~/.kube/config"
+
+info "Node joined the HCN and is ready."

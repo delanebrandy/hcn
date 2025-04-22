@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # ------------------------------------------------------------------------------
 # Author: Delane Brandy
 # Email:  d.brandy@se21.qmul.ac.uk
@@ -26,9 +26,14 @@ REGISTRY_HOST="${REGISTRY_HOST:-$(hostname -I | awk '{print $1}')}"
 REGISTRY_PORT="${REGISTRY_PORT:-30000}"
 REGISTRY_ADDR="${REGISTRY_HOST}:${REGISTRY_PORT}"
 
-info "Joining Docker registry at ${REGISTRY_ADDR} as an insecure registry..."
+info "Checking if Docker registry at ${REGISTRY_ADDR} is already configured as an insecure registry..."
 
-cat > "/etc/docker/daemon.json" <<EOF
+if grep -q "${REGISTRY_ADDR}" /etc/docker/daemon.json 2>/dev/null; then
+  info "Docker registry at ${REGISTRY_ADDR} is already configured as an insecure registry."
+else
+  info "Joining Docker registry at ${REGISTRY_ADDR} as an insecure registry..."
+
+  cat > "/etc/docker/daemon.json" <<EOF
 {
   "insecure-registries": [
     "${REGISTRY_ADDR}"
@@ -36,18 +41,21 @@ cat > "/etc/docker/daemon.json" <<EOF
 }
 EOF
 
-info "Restarting Docker service..."
-systemctl restart docker
+  info "Restarting Docker service..."
+  systemctl restart docker
+fi
+
 info "Docker now trusts ${REGISTRY_ADDR} as an insecure registry."
 
 IMAGE="${REGISTRY_ADDR}/distcc:latest"
 info "Building distcc server image..."
-docker build -t "$IMAGE" .
+docker build --network=host -t "$IMAGE" .
 
 info "Pushing to registry..."
 docker push "$IMAGE"
 
 info "Deploying DaemonSet and Headless Service..."
+kubectl create namespace devtools
 kubectl apply -n devtools -f distcc-daemonset.yaml
 kubectl apply -n devtools -f distcc-headless.yaml
 

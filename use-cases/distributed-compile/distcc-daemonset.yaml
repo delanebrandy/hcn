@@ -13,14 +13,16 @@ spec:
     metadata:
       labels:
         app: distcc
-    spec:
-      containers:
-      - name: distccd
-        image: registry.registry.svc.cluster.local:5000/distcc:latest
-        ports:
-        - containerPort: 3632
-          hostPort: 3632
-          protocol: TCP
-        env:
-        - name: ALLOW
-          value: "10.0.0.0/8"
+      spec:
+        template:
+          spec:
+            containers:
+            - name: distccd
+              image: 192.168.0.104:30000/distcc:latest
+              command: ["distccd"]
+              args:
+                - "--daemon"
+                - "--allow=10.0.0.0/8"
+              ports:
+              - containerPort: 3632
+                hostPort: 3632
