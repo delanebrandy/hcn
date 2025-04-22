@@ -59,4 +59,4 @@ echo " --cri-socket unix:///var/run/docker.sock" >> ~/join-command.sh
 chmod +x ~/join-command.sh
 
 ## Create NFS share if available
-./setup-storage.sh
+../storage/setup-storage.sh

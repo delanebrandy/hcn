@@ -129,33 +129,33 @@ main() {
   # Run node setup
   info "Running node setup..."
   if $CONTROL_NODE; then
-    ./init-control.sh
+    ./setup/init-control.sh
   else
     ssh_setup
-    ./init.sh
+    ./setup/init.sh
 
     # Join HCN
     info "Joining HCN..."
-    ./join-hcn.sh "$IP_ADDRESS" "$SSH_UNAME"
+    ./setup/join-hcn.sh "$IP_ADDRESS" "$SSH_UNAME"
   fi
 
   # Set up monitoring
   info "Setting up monitoring..."
-  ./setup-labelling.sh
+  ./setup/setup-labelling.sh
 
   # Run benchmarks
   info "Running benchmarks..."
-  ./node-perf.sh
+  ./setup/node-perf.sh
 
   # Init static labelling
-  python3 static_labelling.py
+  python3 setup/static_labelling.py
 
   # Init dynamic labelling
   info "Setting up dynamic labelling..."
   if wsl2; then
-  ./setup-wsl-labelling.sh $ORIG_USER $IP_ADDRESS $SSH_UNAME 
+  ./setup/setup-wsl-labelling.sh $ORIG_USER $IP_ADDRESS $SSH_UNAME 
   else
-  ./setup-labelling.sh $ORIG_USER $IP_ADDRESS $SSH_UNAME 
+  ./setup/setup-labelling.sh $ORIG_USER $IP_ADDRESS $SSH_UNAME 
   fi
 
   if $NET_DRIVE; then
