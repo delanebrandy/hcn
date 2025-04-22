@@ -19,6 +19,11 @@ CONTROL_NODE=false
 NET_DRIVE=false
 NFS_PATH="/mnt/shared_drive"
 
+if [[ "$EUID" -eq 0 ]]; then
+  error "This script should not be run as root. Please run as a regular user."
+  exit 1
+fi
+
 #Check for --control-node flag
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -38,9 +43,7 @@ done
 
 # Ensure the script is run as root with --preserve-env=PATH
 if (( EUID )); then
-  export ORIG_USER="$(whoami)"
-  export HOME=$HOME
-  exec sudo --preserve-env=PATH "$0" "$@"
+  exec sudo --preserve-env=PATH,USER,HOME "$0" "$@"
 fi
 
 # Detect if running in WSL2
@@ -116,13 +119,13 @@ save_info(){
 
   # Create global env script
   ENV_FILE="/etc/profile.d/hcn-env.sh"
-  cat > "$ENV_FILE" <<EOF
+  cat > "$ENV_FILE" << EOF 
 #!/bin/sh
 export HCN_HOSTNAME="${HCN_HOSTNAME:-control-plane}"
 export HCN_IP_ADDRESS="${IP_ADDRESS:-$(hostname -I | awk '{print $1}')}"
 export HCN_SSH_UNAME="${SSH_UNAME:-null}"
 export HCN_NFS_PATH="${NFS_PATH:-null}"
-export HCN_ORIG_USER="${ORIG_USER:-user}"
+export HCN_ORIG_USER="${USER:-user}"
 export HOME_DIR="${HOME:-/root}"
 EOF
 

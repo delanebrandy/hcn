@@ -12,22 +12,20 @@ GREEN='\033[0;32m'; RED='\033[0;31m'; NC='\033[0m'
 info()  { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-# Check root
-if [[ "$EUID" -ne 0 ]]; then
-  error "Please run as root (e.g., sudo $0)"
-  exit 1
+if (( EUID )); then
+  exec sudo --preserve-env=PATH,USER,HOME "$0" "$@"
 fi
-
-USER_HOME=$(eval echo "~$USERNAME")
 
 # --- 1. Install dependencies ---
 info "Installing distcc and ccache..."
 apt-get update -qq
 apt-get install -y -qq ccache distcc
 
+chmod 777 /.distcc/hosts
+
 # --- 2. Configure ccache ---
 info "Configuring ccache..."
-CCACHE_CONF="$USER_HOME/.ccache/ccache.conf"
+CCACHE_CONF="$HOME/.ccache/ccache.conf"
 mkdir -p "$(dirname "$CCACHE_CONF")"
 cat > "$CCACHE_CONF" <<EOF
 max_size    = 25.0G
@@ -61,9 +59,6 @@ else
 fi
 info "Linked ccache compiler wrappers."
 
-
-
-
 # --- 3. Create wrapper ---
 info "Creating distcc wrapper..."
 WRAPPER="/usr/local/bin/distcc-wrap.sh"
@@ -88,7 +83,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-User=$HCN_ORIG_USER
+User=${USER}
 ExecStart=/usr/local/bin/client-refresh-hosts.sh
 EOF
 

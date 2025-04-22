@@ -18,7 +18,7 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 
-info "Resolving distcc pod IPs via headless service..."
+info "Resolving distcc pod IPs for $NAMESPACE namespace..."
 
 # Ensure ~/.distcc exists
 mkdir -p "$(dirname "$HOSTS_FILE")"
