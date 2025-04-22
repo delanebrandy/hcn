@@ -14,7 +14,7 @@ NC='\033[0m'
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-ORIG_USER="${SUDO_USER:-$USER}" 
+ORIG_USER="null" 
 CONTROL_NODE=false
 NET_DRIVE=false
 NFS_PATH="/mnt/shared_drive"
@@ -38,6 +38,7 @@ done
 
 # Ensure the script is run as root with --preserve-env=PATH
 if (( EUID )); then
+  ORIG_USER="$(whoami)"
   exec sudo --preserve-env=PATH "$0" "$@"
 fi
 
@@ -62,7 +63,7 @@ get_ip() {
       info "Installing Python via winget on Windows..."
       powershell.exe winget install --id Python.Python.3 --source winget
     fi
-    IP_ADDRESS=$(powershell.exe python hostname.py $HCN_HOSTNAME | tr -d '\r')
+    IP_ADDRESS=$(powershell.exe python setup/hostname.py $HCN_HOSTNAME | tr -d '\r')
   else
     if [[ "$HCN_HOSTNAME" != *".local" ]]; then
       IP_ADDRESS="${HCN_HOSTNAME}.local"
@@ -109,6 +110,26 @@ ssh_setup() {
   chmod 600 /root/.ssh/id_rsa
 }
 
+save_info(){
+  info "Saving global variables..."
+
+  # Create global env script
+  ENV_FILE="/etc/profile.d/hcn-env.sh"
+  cat > "$ENV_FILE" <<EOF
+#!/bin/sh
+export HCN_HOSTNAME="$HCN_HOSTNAME"
+export HCN_IP_ADDRESS="$IP_ADDRESS"
+export HCN_SSH_UNAME="$SSH_UNAME"
+export HCN_NFS_PATH="$NFS_PATH"
+export HCN_ORIG_USER="$ORIG_USER"
+export HOME_DIR="$HOME"
+EOF
+
+  info "Created global env script at $ENV_FILE."
+  chmod +x /etc/profile.d/hcn-env.sh
+
+}
+
 # Main Script Execution
 main() {
 
@@ -125,13 +146,13 @@ main() {
   apt-get install -y -qq python3 python3-pip python3-venv python3-psutil
   #pip3 install -r requirements.txt
 
-
   # Run node setup
   info "Running node setup..."
   if $CONTROL_NODE; then
     ./setup/init-control.sh
   else
     ssh_setup
+    save_info
     ./setup/init.sh
 
     # Join HCN
