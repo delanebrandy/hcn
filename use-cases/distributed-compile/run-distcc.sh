@@ -1,62 +1,35 @@
 #!/bin/bash
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # Author: Delane Brandy
-# Email:  d.brandy@se21.qmul.ac.uk
 # Script: run-distcc.sh
-# Description: Builds and pushes the distcc Docker image to an insecure registry,
-#              then deploys DistCC manifests.
-# ------------------------------------------------------------------------------
+# Description: Builds and deploys distcc DaemonSet using local registry.
+# --------------------------------------------------------------------------
 
 set -euo pipefail
 
-# Colors for log messages
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
-info()  { echo -e "${GREEN}[INFO]${NC} $*"; }
+info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-# Ensure the script is run as root
 if [[ "$EUID" -ne 0 ]]; then
   error "Please run as root (e.g., sudo $0)"
   exit 1
 fi
 
-REGISTRY_HOST="${REGISTRY_HOST:-$(hostname -I | awk '{print $1}')}"
-REGISTRY_PORT="${REGISTRY_PORT:-30000}"
-REGISTRY_ADDR="${REGISTRY_HOST}:${REGISTRY_PORT}"
+info "Fetching registry IP..."
+REGISTRY_IP=$(kubectl get svc registry -n registry -o jsonpath='{.spec.clusterIP}')
+IMAGE="$REGISTRY_IP:5000/distcc:latest"
 
-info "Checking if Docker registry at ${REGISTRY_ADDR} is already configured as an insecure registry..."
-
-if grep -q "${REGISTRY_ADDR}" /etc/docker/daemon.json 2>/dev/null; then
-  info "Docker registry at ${REGISTRY_ADDR} is already configured as an insecure registry."
-else
-  info "Joining Docker registry at ${REGISTRY_ADDR} as an insecure registry..."
-
-  cat > "/etc/docker/daemon.json" <<EOF
-{
-  "insecure-registries": [
-    "${REGISTRY_ADDR}"
-  ]
-}
-EOF
-
-  info "Restarting Docker service..."
-  systemctl restart docker
-fi
-
-info "Docker now trusts ${REGISTRY_ADDR} as an insecure registry."
-
-IMAGE="${REGISTRY_ADDR}/distcc:latest"
 info "Building distcc server image..."
-docker build --network=host -t "$IMAGE" .
+docker build -t "$IMAGE" .
 
-info "Pushing to registry..."
+info "Pushing image to local registry..."
 docker push "$IMAGE"
 
-info "Deploying DaemonSet and Headless Service..."
-kubectl create namespace devtools
-kubectl apply -n devtools -f distcc-daemonset.yaml
-kubectl apply -n devtools -f distcc-headless.yaml
+info "Deploying distcc DaemonSet..."
+kubectl apply -f distcc-daemonset.yaml
 
-info "All distcc daemons should now be running on each node."
+info "✅ distcc DaemonSet is deployed to all nodes."
+info "📡 Headless Service has been removed — dynamic hosts will be resolved via kubectl."
