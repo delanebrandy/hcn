@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eo pipefail
 
 #---------------------------------------------------------------
 # Script: client-distcc.sh
@@ -18,7 +18,6 @@ if [[ "$EUID" -ne 0 ]]; then
   exit 1
 fi
 
-USERNAME="${SUDO_USER:-$USER}"
 USER_HOME=$(eval echo "~$USERNAME")
 
 # --- 1. Install dependencies ---
@@ -73,11 +72,8 @@ exec distcc "/usr/bin/${compiler}" "$@"
 EOF
 chmod +x "$WRAPPER"
 
-
-
 # --- 4. Create systemd service ---
-
-install -m 755 ./client-refresh-hosts.sh /usr/local/bin/
+install -m 777 ./client-refresh-hosts.sh /usr/local/bin/
 
 info "Creating systemd service..."
 SERVICE_PATH="/etc/systemd/system/update-distcc-hosts.service"
@@ -89,7 +85,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-User=$USERNAME
+User=$HCN_ORIG_USER
 ExecStart=/usr/local/bin/client-refresh-hosts.sh
 EOF
 
@@ -117,6 +113,3 @@ systemctl enable --now update-distcc-hosts.timer
 
 # --- 7. Output ---
 info "Setup complete!"
-echo -e "➡️  Edit or create: $USER_HOME/hcn/use-cases/distributed-compile/client-refresh-hosts.sh"
-echo -e "➡️  Make it executable: chmod +x client-refresh-hosts.sh"
-echo -e "➡️  It will run every 5 minutes and update ~/.distcc/hosts"
