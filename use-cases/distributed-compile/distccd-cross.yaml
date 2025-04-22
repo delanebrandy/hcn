@@ -19,7 +19,7 @@ spec:
         role: arm64-cross
     spec:
       nodeSelector:
-        kubernetes.io/arc: amd64
+        kubernetes.io/arch: amd64
         cpu: high
       containers:
       - name: distccd
