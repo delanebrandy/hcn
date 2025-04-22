@@ -5,7 +5,7 @@ metadata:
   namespace: devtools
   labels:
     app: distcc
-    arch: amd64
+    kubernetes.io/arch: amd64
     cross: arm64
 spec:
   selector:
@@ -19,7 +19,7 @@ spec:
         role: arm64-cross
     spec:
       nodeSelector:
-        arch: amd64
+        kubernetes.io/arc: amd64
         cpu: high
       containers:
       - name: distccd

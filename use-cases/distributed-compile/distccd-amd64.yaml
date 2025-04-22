@@ -5,7 +5,7 @@ metadata:
   namespace: devtools
   labels:
     app: distcc
-    arch: amd64
+    kubernetes.io/arch: amd64
 spec:
   selector:
     matchLabels:
@@ -18,7 +18,7 @@ spec:
         role: amd64-native
     spec:
       nodeSelector:
-        arch: amd64
+        kubernetes.io/arc: amd64
       containers:
       - name: distccd
         image: registry.registry.svc.cluster.local:5000/distccd-amd64-native:latest
