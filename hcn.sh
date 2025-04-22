@@ -38,7 +38,8 @@ done
 
 # Ensure the script is run as root with --preserve-env=PATH
 if (( EUID )); then
-  ORIG_USER="$(whoami)"
+  export ORIG_USER="$(whoami)"
+  export HOME=$HOME
   exec sudo --preserve-env=PATH "$0" "$@"
 fi
 
@@ -127,6 +128,7 @@ EOF
 
   info "Created global env script at $ENV_FILE."
   chmod +x /etc/profile.d/hcn-env.sh
+  source /etc/profile.d/hcn-env.sh
 
 }
 

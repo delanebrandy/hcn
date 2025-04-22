@@ -47,6 +47,7 @@ export PATH="/usr/lib/ccache:\$PATH"
 EOF
 chmod +x "$ENV_FILE"
 info "Created global env script at $ENV_FILE."
+source "$ENV_FILE"
 
 # Create symlinks for ccache
 info "Creating symlinks for ccache..."
@@ -62,6 +63,7 @@ info "Linked ccache compiler wrappers."
 
 
 
+
 # --- 3. Create wrapper ---
 info "Creating distcc wrapper..."
 WRAPPER="/usr/local/bin/distcc-wrap.sh"
@@ -71,6 +73,7 @@ compiler=$(basename "$1"); shift
 exec distcc "/usr/bin/${compiler}" "$@"
 EOF
 chmod +x "$WRAPPER"
+
 
 # --- 4. Create systemd service ---
 install -m 777 ./client-refresh-hosts.sh /usr/local/bin/
