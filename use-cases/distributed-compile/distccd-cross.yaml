@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: distccd-cross
+  namespace: devtools
+  labels:
+    app: distcc
+    arch: amd64
+    cross: arm64
+spec:
+  selector:
+    matchLabels:
+      app: distcc
+      role: arm64-cross
+  template:
+    metadata:
+      labels:
+        app: distcc
+        role: arm64-cross
+    spec:
+      nodeSelector:
+        arch: amd64
+        cpu: high
+      containers:
+      - name: distccd
+        image: registry.registry.svc.cluster.local:5000/distccd-arm64-cross:latest
+        ports:
+        - containerPort: 3632
+          hostPort: 3632
+          protocol: TCP

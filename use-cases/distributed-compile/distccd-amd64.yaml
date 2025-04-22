@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: distccd-amd64
+  namespace: devtools
+  labels:
+    app: distcc
+    arch: amd64
+spec:
+  selector:
+    matchLabels:
+      app: distcc
+      role: amd64-native
+  template:
+    metadata:
+      labels:
+        app: distcc
+        role: amd64-native
+    spec:
+      nodeSelector:
+        arch: amd64
+      containers:
+      - name: distccd
+        image: registry.registry.svc.cluster.local:5000/distccd-amd64-native:latest
+        ports:
+        - containerPort: 3632
+          hostPort: 3632
+          protocol: TCP
