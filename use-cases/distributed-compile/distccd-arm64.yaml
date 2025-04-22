@@ -21,7 +21,7 @@ spec:
         kubernetes.io/arch: arm64
       containers:
       - name: distccd
-        image: registry.registry.svc.cluster.local:5000/distccd-arm64-native:latest
+        image: registry/distccd-arm64-native:latest
         ports:
         - containerPort: 3632
           hostPort: 3632
