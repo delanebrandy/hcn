@@ -31,5 +31,4 @@ docker push "$IMAGE"
 info "Deploying distcc DaemonSet..."
 kubectl apply -f distcc-daemonset.yaml
 
-info "✅ distcc DaemonSet is deployed to all nodes."
-info "📡 Headless Service has been removed — dynamic hosts will be resolved via kubectl."
+info "distcc DaemonSet is deployed to all untainted nodes."

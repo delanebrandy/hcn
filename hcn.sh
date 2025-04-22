@@ -117,12 +117,12 @@ save_info(){
   ENV_FILE="/etc/profile.d/hcn-env.sh"
   cat > "$ENV_FILE" <<EOF
 #!/bin/sh
-export HCN_HOSTNAME="$HCN_HOSTNAME"
-export HCN_IP_ADDRESS="$IP_ADDRESS"
-export HCN_SSH_UNAME="$SSH_UNAME"
-export HCN_NFS_PATH="$NFS_PATH"
-export HCN_ORIG_USER="$ORIG_USER"
-export HOME_DIR="$HOME"
+export HCN_HOSTNAME="${HCN_HOSTNAME:-control-plane}"
+export HCN_IP_ADDRESS="${IP_ADDRESS:-$(hostname -I | awk '{print $1}')}"
+export HCN_SSH_UNAME="${SSH_UNAME:-null}"
+export HCN_NFS_PATH="${NFS_PATH:-null}"
+export HCN_ORIG_USER="${ORIG_USER:-user}"
+export HOME_DIR="${HOME:-/root}"
 EOF
 
   info "Created global env script at $ENV_FILE."
@@ -157,7 +157,7 @@ main() {
 
     # Join HCN
     info "Joining HCN..."
-    ./setup/join-hcn.sh "$IP_ADDRESS" "$SSH_UNAME"
+    ./setup/join-hcn.sh
   fi
 
   # Set up monitoring
@@ -174,15 +174,15 @@ main() {
   # Init dynamic labelling
   info "Setting up dynamic labelling..."
   if wsl2; then
-  ./setup/setup-wsl-labelling.sh $ORIG_USER $IP_ADDRESS $SSH_UNAME 
+  ./setup/setup-wsl-labelling.sh
   else
-  ./setup/setup-labelling.sh $ORIG_USER $IP_ADDRESS $SSH_UNAME 
+  ./setup/setup-labelling.sh
   fi
 
   if $NET_DRIVE; then
     if $CONTROL_NODE; then
-      info "Setting up NFS share at $IP_ADDRESS..."
-      ./storage/setup-storage.sh "$IP_ADDRESS"
+      info "Setting up NFS share on host..."
+      ./storage/setup-storage.sh
     else
       info "Joining NFS share at $IP_ADDRESS..."
       ./storage/join-storage.sh "$IP_ADDRESS"

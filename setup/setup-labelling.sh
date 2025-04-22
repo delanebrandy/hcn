@@ -2,21 +2,27 @@
 # -------------------------------------------------------------------------------
 # Author: Delane Brandy
 # Email:  d.brandy@se21.qmul.ac.uk
-# Script: EDIT
-# Description: EDIT
+# Script: setup-dynamic-labelling.sh
+# Description: Installs and enables dynamic labelling as a systemd service.
 # -------------------------------------------------------------------------------
+
 set -euo pipefail
 
-if [[ $# -ne 2 ]]; then
-  echo "Usage: $0 <control-plane-IP> <ssh-username>"
+# Colors for log messages
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
+info() { echo -e "${GREEN}[INFO]${NC} $*"; }
+error() { echo -e "${RED}[ERROR]${NC} $*"; }
+
+# Validate required environment variables
+if [[ -z "${HCN_IP_ADDRESS:-}" || -z "${HCN_SSH_UNAME:-}" ]]; then
+  error "Missing environment variables: HCN_IP_ADDRESS or HCN_SSH_UNAME"
   exit 1
 fi
-IP_ADDRESS="$1"
-SSH_UNAME="$2"
 
-
-info() { echo -e "\033[1;32m[INFO]\033[0m $*"; }
-error() { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
+IP_ADDRESS="$HCN_IP_ADDRESS"
+SSH_UNAME="$HCN_SSH_UNAME"
 
 SERVICE_NAME="dynamic-labelling.service"
 SCRIPT_NAME="dynamic_labelling.py"
@@ -40,7 +46,7 @@ Description=Dynamic Node Labelling Service
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 $SCRIPT_PATH $SSH_UNAME $IP_ADDRESS 
+ExecStart=/usr/bin/python3 $SCRIPT_PATH $SSH_UNAME $IP_ADDRESS
 Restart=on-failure
 User=root
 Environment=PATH=/usr/bin:/usr/local/bin
@@ -55,7 +61,7 @@ info "Enabling and starting the service..."
 systemctl daemon-reload
 systemctl enable --now "$SERVICE_NAME"
 
-# Check
+# Check service status
 if systemctl is-active --quiet "$SERVICE_NAME"; then
   info "Dynamic node labelling is running and enabled on boot."
 else

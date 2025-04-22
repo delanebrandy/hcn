@@ -2,8 +2,8 @@
 # ------------------------------------------------------------------------------
 # Author: Delane Brandy
 # Email:  d.brandy@se21.qmul.ac.uk
-# Script: EDIT
-# Description: EDIT
+# Script: join-hcn.sh
+# Description: Adds a node to the Home Computing Network.
 # ------------------------------------------------------------------------------
 
 set -euo pipefail
@@ -21,24 +21,23 @@ if [[ "$EUID" -ne 0 ]]; then
   exit 1
 fi
 
-if [[ $# -ne 2 ]]; then
-  echo "Usage: $0 <control-plane-IP> <ssh-username>"
+# Ensure required environment variables are set
+if [[ -z "${HCN_IP_ADDRESS:-}" || -z "${HCN_SSH_UNAME:-}" ]]; then
+  error "Required environment variables not set: HCN_IP_ADDRESS and HCN_SSH_UNAME"
   exit 1
 fi
-IP_ADDRESS="$1"
-SSH_UNAME="$2"
 
-# Copy join script and key from control node using scp sshkey 
+IP_ADDRESS="$HCN_IP_ADDRESS"
+SSH_UNAME="$HCN_SSH_UNAME"
+
+info "Connecting to control node at $IP_ADDRESS as $SSH_UNAME..."
 info "Fetching join script..."
-
 scp "$SSH_UNAME@$IP_ADDRESS:~/join-command.sh" /tmp/join.sh  
 chmod +x /tmp/join.sh
 
-# Run join script
 info "Running join script..."
 /tmp/join.sh
 
-# Check if the join command was successful
 if [[ $? -eq 0 ]]; then
   info "Successfully joined the HCN."
 else
@@ -46,7 +45,7 @@ else
   exit 1
 fi
 
-# Check if the node is ready
+info "Checking node readiness..."
 if kubectl get nodes 2>/dev/null | grep -q "Ready"; then
   info "Node is ready."
 else
@@ -55,6 +54,6 @@ else
 fi
 
 mkdir -p ~/.kube
-scp "$SSH_UNAME@$IP_ADDRESS:~/.kube/config ~/.kube/config"
+scp "$SSH_UNAME@$IP_ADDRESS:~/.kube/config" ~/.kube/config
 
 info "Node joined the HCN and is ready."
