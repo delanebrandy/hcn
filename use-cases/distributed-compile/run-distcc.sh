@@ -13,8 +13,8 @@ NC='\033[0m'
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-REGISTRY=192.168.0.104
-PORT=3000
+REGISTRY=10.98.140.241
+PORT=5000
 REG_URL="${REGISTRY}:${PORT}"
 
 info "Building arm64-native distccd image..."
@@ -33,7 +33,7 @@ info "All relevant distccd images have been built and pushed."
 
 info "Deploying distccd DaemonSets..."
 
-sed -i "s|registry|${REG_URL}|g" distccd-*.yaml
+sed -i "s|registry|${'192.168.0.104:30000'}|g" distccd-*.yaml
 
 kubectl apply -f distccd-arm64.yaml
 kubectl apply -f distccd-cross.yaml
