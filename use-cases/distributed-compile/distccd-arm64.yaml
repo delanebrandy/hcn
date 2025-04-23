@@ -23,9 +23,9 @@ spec:
       - name: distccd
         image: registry/distccd-arm64-native:latest
         command: ["distccd"]
-          args:
-            - "--daemon"
-            - "--allow=10.0.0.0/8"
+        args:
+          - "--daemon"
+          - "--allow=10.0.0.0/8"
         ports:
         - containerPort: 3632
           hostPort: 3632
