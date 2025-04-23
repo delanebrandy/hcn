@@ -13,7 +13,7 @@ NC='\033[0m'
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-REGISTRY=10.98.140.241
+REGISTRY=$(kubectl get svc registry -n registry -o jsonpath='{.spec.clusterIP}')
 PORT=5000
 REG_URL="${REGISTRY}:${PORT}"
 
