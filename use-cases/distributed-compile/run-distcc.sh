@@ -13,8 +13,8 @@ NC='\033[0m'
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-REGISTRY=$(kubectl get svc registry -n registry -o jsonpath='{.spec.clusterIP}')
-PORT=5000
+REGISTRY=192.168.0.104
+PORT=3000
 REG_URL="${REGISTRY}:${PORT}"
 
 info "Building arm64-native distccd image..."
