@@ -24,6 +24,10 @@ spec:
       containers:
       - name: distccd
         image: registry/distccd-arm64-cross:latest
+        command: ["distccd"]
+          args:
+            - "--daemon"
+            - "--allow=10.0.0.0/8"
         ports:
         - containerPort: 3632
           hostPort: 3632
