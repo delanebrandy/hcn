@@ -24,7 +24,7 @@ spec:
         image: registry/distccd-arm64-native:latest
         command: ["distccd"]
         args:
-          - "--daemon"
+          - "--no-detach"
           - "--allow=10.0.0.0/8"
         ports:
         - containerPort: 3632
