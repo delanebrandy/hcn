@@ -13,6 +13,8 @@ spec:
       labels:
         app: registry
     spec:
+      nodeSelector:
+        role: registry
       containers:
       - name: registry
         image: registry:2
