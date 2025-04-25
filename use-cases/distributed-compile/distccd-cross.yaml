@@ -23,7 +23,7 @@ spec:
         cpu: high
       containers:
       - name: distccd
-        image: registry/distccd-arm64-cross:latest
+        image: registry/distccd-amd64-cross:latest
         command: ["distccd"]
         args:
           - "--daemon"
