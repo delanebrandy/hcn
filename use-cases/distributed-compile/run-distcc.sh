@@ -17,6 +17,16 @@ REGISTRY=$(kubectl get svc registry -n registry -o jsonpath='{.spec.clusterIP}')
 PORT=5000
 REG_URL="${REGISTRY}:${PORT}"
 
+info "Adding registry to Docker daemon..."
+if ! grep -q "${REG_URL}" /etc/docker/daemon.json; then
+    echo "Adding registry to Docker daemon..."
+    sudo mkdir -p /etc/docker
+    echo "{ \"insecure-registries\": [\"${REG_URL}\"] }" | sudo tee /etc/docker/daemon.json
+    sudo systemctl restart docker
+else
+    info "Registry already added to Docker daemon."
+fi
+
 info "Building arm64-native distccd image..."
 docker build -t ${REG_URL}/distccd-arm64-native:latest -f Dockerfile.arm64 .
 docker push ${REG_URL}/distccd-arm64-native:latest
@@ -33,7 +43,10 @@ info "All relevant distccd images have been built and pushed."
 
 info "Deploying distccd DaemonSets..."
 
-sed -i "s|registry|${'192.168.0.104:30000'}|g" distccd-*.yaml
+SUB_URL="$(hostname -I | awk '{print $1}'):30000"
+
+info "Replacing placeholder 'registry' with ${SUB_URL} in all DaemonSet yamls…"
+sed -i "s|registry|${SUB_URL}|g" distccd-*.yaml
 
 kubectl apply -f distccd-arm64.yaml
 kubectl apply -f distccd-cross.yaml
