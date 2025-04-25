@@ -27,13 +27,8 @@ else
     info "Registry already added to Docker daemon."
 fi
 
-info "Building arm64-native distccd image..."
-docker buildx build --platform linux/amd64,linux/arm64 -t ${REG_URL}/distccd-native:latest -f Dockerfile.native .
-docker push ${REG_URL}/distccd-arm64-native:latest
-
-info "Building amd64-native distccd image..."
-docker buildx build --platform linux/amd64,linux/arm64 -t ${REG_URL}/distccd-native:latest -f Dockerfile.native .
-docker push ${REG_URL}/distccd-amd64-native:latest
+info "Building cross platfrom native distccd image..."
+docker buildx build --platform linux/amd64,linux/arm64 -t ${REG_URL}/distccd-native:latest --push -f Dockerfile.native .
 
 info "Building amd64-cross (arm64 target) distccd image..."
 docker build --platform linux/amd64 -t ${REG_URL}/distccd-amd64-cross:latest -f Dockerfile.cross .
