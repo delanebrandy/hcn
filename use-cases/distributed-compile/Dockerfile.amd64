@@ -4,5 +4,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq && \
     apt-get install -y -qq distcc gcc g++ clang && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN useradd --no-create-home distcc
-CMD ["distccd", "--daemon", "--allow=10.0.0.0/8", "--log-stderr"]
+    ENV ALLOW 10.0.0.0/8
+
+    RUN useradd --no-create-home distcc
+    USER distcc
+    
+    EXPOSE 3632
+    
+    CMD ["distccd","--no-detach","--daemon","--jobs","$(nproc)","--allow","${ALLOW}","--log-stderr"] 
