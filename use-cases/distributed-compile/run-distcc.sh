@@ -28,11 +28,11 @@ else
 fi
 
 info "Building arm64-native distccd image..."
-docker build --platform linux/amd64,linux/arm64 -t ${REG_URL}/distccd-native:latest -f Dockerfile.native .
+docker buildx build --platform linux/amd64,linux/arm64 -t ${REG_URL}/distccd-native:latest -f Dockerfile.native .
 docker push ${REG_URL}/distccd-arm64-native:latest
 
 info "Building amd64-native distccd image..."
-docker build --platform linux/amd64,linux/arm64 -t ${REG_URL}/distccd-native:latest -f Dockerfile.native .
+docker buildx build --platform linux/amd64,linux/arm64 -t ${REG_URL}/distccd-native:latest -f Dockerfile.native .
 docker push ${REG_URL}/distccd-amd64-native:latest
 
 info "Building amd64-cross (arm64 target) distccd image..."
