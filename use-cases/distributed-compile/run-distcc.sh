@@ -55,8 +55,11 @@ else
     info "Using existing buildx builder."
 fi
 
-info "Building cross platfrom native distccd image..."
-docker buildx build --platform linux/amd64,linux/arm64 -t ${REG_URL}/distccd-native:latest -f Dockerfile.native --output type=registry .
+info "Building arm64 native distccd image..."
+docker buildx build --platform linux/arm64 -t ${REG_URL}/distccd-arm64-native:latest -f Dockerfile.native --output type=registry .
+
+info "Building amd64 native distccd image..."
+docker buildx build --platform linux/amd64 -t ${REG_URL}/distccd-amd64-native:latest -f Dockerfile.native --output type=registry .
 
 info "Building amd64-cross (amd64 target) distccd image..."
 docker build --platform linux/amd64 -t ${REG_URL}/distccd-amd64-cross:latest -f Dockerfile.cross .
@@ -71,7 +74,8 @@ SUB_URL="$(hostname -I | awk '{print $1}'):30000"
 info "Replacing placeholder 'registry' with ${SUB_URL} in all DaemonSet yamls…"
 sed -i "s|registry|${SUB_URL}|g" distccd-*.yaml
 
-kubectl apply -f distccd-native.yaml
+kubectl apply -f distccd-arm64.yaml
+kubectl apply -f distccd-amd64.yaml
 kubectl apply -f distccd-cross.yaml
 
 info "All applicable distccd daemons have been deployed."

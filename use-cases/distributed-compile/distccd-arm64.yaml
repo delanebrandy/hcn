@@ -1,24 +1,27 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: distccd-native
+  name: distccd-arm64
   namespace: devtools
   labels:
     app: distcc
+    kubernetes.io/arch: arm64
 spec:
   selector:
     matchLabels:
       app: distcc
-      role: native
+      role: arm64-native
   template:
     metadata:
       labels:
         app: distcc
-        role: native
+        role: arm64-native
     spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
       containers:
       - name: distccd
-        image: registry/distccd-native:latest
+        image: registry/distccd-arm64-native:latest
         command: ["distccd"]
         args:
           - "--no-detach"
