@@ -9,8 +9,8 @@ set -eo pipefail
 
 # CONFIGURATION
 NAMESPACE="devtools"
-ARM64_LABEL_SELECTOR="app=distcc,role=arm64"
-AMD64_LABEL_SELECTOR="app=distcc,role in (arm64-native,arm64-cross"
+ARM64_LABEL_SELECTOR="app=distcc,role in (arm64-native,arm64-cross"
+AMD64_LABEL_SELECTOR="app=distcc,role=amd64-native"
 CONNECTIONS_PER_NODE=4
 HOSTS_FILE="$HOME_DIR/.distcc/hosts"
 

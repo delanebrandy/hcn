@@ -29,6 +29,6 @@ spec:
           - "--no-detach"
           - "--allow=10.0.0.0/8"
         ports:
-        - containerPort: 3632
-          hostPort: 3632
+        - containerPort: 3633
+          hostPort: 3633
           protocol: TCP
