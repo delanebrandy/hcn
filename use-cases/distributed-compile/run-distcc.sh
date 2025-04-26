@@ -56,7 +56,7 @@ else
 fi
 
 info "Building cross platfrom native distccd image..."
-docker buildx build --platform linux/amd64,linux/arm64 -t ${REG_URL}/distccd-native:latest --push -f Dockerfile.native .
+docker buildx build --platform linux/amd64,linux/arm64 -t ${REG_URL}/distccd-native:latest -f Dockerfile.native --output type=registry .
 
 info "Building amd64-cross (amd64 target) distccd image..."
 docker build --platform linux/amd64 -t ${REG_URL}/distccd-amd64-cross:latest -f Dockerfile.cross .
