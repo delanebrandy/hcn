@@ -44,10 +44,7 @@ fi
 
 # --- Build and Push Docker Image ---
 info "Building Real-ESRGAN Docker image..."
-docker build -t "${REG_URL}/${IMAGE_NAME}:latest" .
-
-info "Pushing image to local registry..."
-docker push "${REG_URL}/${IMAGE_NAME}:latest"
+docker buildx build --platform linux/amd64 -t "${REG_URL}/${IMAGE_NAME}:latest" --output type=registry .
 
 # --- Prepare YAML ---
 info "Preparing Kubernetes manifests..."
