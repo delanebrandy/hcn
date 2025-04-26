@@ -14,6 +14,7 @@ info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
 REGISTRY=$(kubectl get svc registry -n registry -o jsonpath='{.spec.clusterIP}')
+SUB_URL="$(hostname -I | awk '{print $1}'):30000"
 PORT=5000
 REG_URL="${REGISTRY}:${PORT}"
 
@@ -21,16 +22,43 @@ info "Adding registry to Docker daemon..."
 if ! grep -q "${REG_URL}" /etc/docker/daemon.json; then
     echo "Adding registry to Docker daemon..."
     sudo mkdir -p /etc/docker
-    echo "{ \"insecure-registries\": [\"${REG_URL}\"] }" | sudo tee /etc/docker/daemon.json
+    echo "{ \"insecure-registries\": [\"${REG_URL}\", \"${SUB_URL}\"] }" | sudo tee /etc/docker/daemon.json
     sudo systemctl restart docker
 else
     info "Registry already added to Docker daemon."
 fi
 
+info "Configuring buildx"
+if ! docker buildx inspect --bootstrap; then
+    docker run --rm --privileged tonistiigi/binfmt --install all
+
+    info "Setting registry credentials..."
+
+    cat > buildkitd.toml <<EOF
+[registry."${REG_URL}"]
+http = true
+insecure = true
+
+[registry."${SUB_URL}"]
+http = true
+insecure = true
+EOF
+
+echo "Generated buildkitd.toml"
+ 
+
+    info "Creating new buildx builder..."
+    docker buildx create --name multiarch --config ./buildkitd.toml --use
+    docker buildx use multiarch
+    docker buildx inspect --bootstrap
+else
+    info "Using existing buildx builder."
+fi
+
 info "Building cross platfrom native distccd image..."
 docker buildx build --platform linux/amd64,linux/arm64 -t ${REG_URL}/distccd-native:latest --push -f Dockerfile.native .
 
-info "Building amd64-cross (arm64 target) distccd image..."
+info "Building amd64-cross (amd64 target) distccd image..."
 docker build --platform linux/amd64 -t ${REG_URL}/distccd-amd64-cross:latest -f Dockerfile.cross .
 docker push ${REG_URL}/distccd-amd64-cross:latest
 
@@ -43,8 +71,7 @@ SUB_URL="$(hostname -I | awk '{print $1}'):30000"
 info "Replacing placeholder 'registry' with ${SUB_URL} in all DaemonSet yamls…"
 sed -i "s|registry|${SUB_URL}|g" distccd-*.yaml
 
-kubectl apply -f distccd-arm64.yaml
+kubectl apply -f distccd-native.yaml
 kubectl apply -f distccd-cross.yaml
-kubectl apply -f distccd-amd64.yaml
 
 info "All applicable distccd daemons have been deployed."
