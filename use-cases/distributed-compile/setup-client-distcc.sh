@@ -21,7 +21,12 @@ info "Installing distcc and ccache..."
 apt-get update -qq
 apt-get install -y -qq ccache distcc
 
-chmod 777 /.distcc/hosts
+if [ ! -e "/.distcc/hosts" ]; then
+  info "File /.distcc/hosts does not exist. Creating it..."
+  mkdir -p "/.distcc"
+  touch "/.distcc/hosts"
+fi
+chmod 777 "/.distcc/hosts"
 
 # --- 2. Configure ccache ---
 info "Configuring ccache..."
