@@ -12,21 +12,12 @@ import time
 import psutil
 import sys
 
-# Parse arguments for SSH info
-if len(sys.argv) != 3:
-    print("Usage: python dynamic_labelling.py <ssh_user> <ssh_host>")
-    sys.exit(1)
-    
-SSH_USER = sys.argv[1]
-SSH_HOST = sys.argv[2]
-SSH_REMOTE = f"{SSH_USER}@{SSH_HOST}"
-
 NODE_NAME_CMD = ["hostname"]
 LABEL_CMD = "kubectl label node {node} {key}={value} --overwrite"
 UNLABEL_CMD = "kubectl label node {node} {key}-"
 
 # Configurable thresholds
-CPU_IDLE_THRESHOLD = 20  
+CPU_IDLE_THRESHOLD = 30  
 BATTERY_THRESHOLD = 70   
 SAMPLE_INTERVAL = 60     
 
@@ -48,15 +39,13 @@ def is_cpu_idle():
 
 def label_node(node, key, value):
     # build remote kubectl label command
-    remote_cmd = LABEL_CMD.format(node=node, key=key, value=value).split()
-    cmd = ["ssh", SSH_REMOTE] + remote_cmd
+    cmd = LABEL_CMD.format(node=node, key=key, value=value).split()
     subprocess.run(cmd, check=True)
 
 
 def unlabel_node(node, key):
     # build remote kubectl unlabel command
-    remote_cmd = UNLABEL_CMD.format(node=node, key=key).split()
-    cmd = ["ssh", SSH_REMOTE] + remote_cmd
+    cmd = UNLABEL_CMD.format(node=node, key=key).split()
     subprocess.run(cmd, check=True)
 
 

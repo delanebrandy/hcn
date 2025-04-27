@@ -80,44 +80,44 @@ apt-get install -y -qq apt-transport-https ca-certificates curl gnupg lsb-releas
 ################################################################################
 # Docker Installation
 ################################################################################
-if ! $WSL; then
-  info "Setting up Docker repository and GPG key..."
 
-  # Create the keyrings directory if it doesn't exist
-  install -m 0755 -d /etc/apt/keyrings
+info "Setting up Docker repository and GPG key..."
 
-  # Download Docker's official GPG key and save it
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-    gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+# Create the keyrings directory if it doesn't exist
+install -m 0755 -d /etc/apt/keyrings
 
-  # Ensure the GPG key has the correct permissions
-  chmod a+r /etc/apt/keyrings/docker.gpg
+# Download Docker's official GPG key and save it
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+  gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-  # Determine the Ubuntu codename
-  UBUNTU_CODENAME="$(lsb_release -cs)"
+# Ensure the GPG key has the correct permissions
+chmod a+r /etc/apt/keyrings/docker.gpg
 
-  # Docker may not officially support 'noble' yet; fallback to 'jammy' if necessary
-  if [[ "$UBUNTU_CODENAME" == "noble" ]]; then
-    info "Detected Ubuntu 24.04 (Noble). Falling back to Docker's 'jammy' repository."
-    DOCKER_CODENAME="jammy"
-  else
-    DOCKER_CODENAME="$UBUNTU_CODENAME"
-  fi
+# Determine the Ubuntu codename
+UBUNTU_CODENAME="$(lsb_release -cs)"
 
-  # Add Docker's repository
-  echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $DOCKER_CODENAME stable" | \
-    tee /etc/apt/sources.list.d/docker.list > /dev/null
+# Docker may not officially support 'noble' yet; fallback to 'jammy' if necessary
+if [[ "$UBUNTU_CODENAME" == "noble" ]]; then
+  info "Detected Ubuntu 24.04 (Noble). Falling back to Docker's 'jammy' repository."
+  DOCKER_CODENAME="jammy"
+else
+  DOCKER_CODENAME="$UBUNTU_CODENAME"
+fi
 
-  # Update package lists to include Docker packages
-  apt-get -qq update
+# Add Docker's repository
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $DOCKER_CODENAME stable" | \
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-  info "Installing Docker Engine and related components..."
-  apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+# Update package lists to include Docker packages
+apt-get -qq update
 
-  info "Enabling and starting Docker service..."
-  systemctl enable --now docker
-fi 
+info "Installing Docker Engine and related components..."
+apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+info "Enabling and starting Docker service..."
+systemctl enable --now docker
+
 ################################################################################
 # Kubernetes Installation
 ################################################################################
@@ -176,12 +176,6 @@ sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd/syst
 
 info "Enabling and starting cri-dockerd services..."
 
-if $WSL; then
-  UNIT_FILE="/etc/systemd/system/cri-docker.service"
-sed -i -E \
-  's|^ExecStart=.*|ExecStart=/usr/local/bin/cri-dockerd --container-runtime-endpoint fd:// --docker-root /mnt/wsl/docker-desktop-data/data/docker|' \
-  "$UNIT_FILE"
-fi
 systemctl daemon-reload
 systemctl enable cri-docker.service
 systemctl enable --now cri-docker.socket
