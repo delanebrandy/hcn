@@ -187,6 +187,10 @@ main() {
   info "Setting up monitoring..."
   ./setup/setup-labelling.sh
 
+  # Set up drivers
+  info "Setting up drivers..."
+  ./setup/setup-drivers.sh
+
   # Run benchmarks
   info "Running benchmarks..."
   ./setup/node-perf.sh
