@@ -19,11 +19,6 @@ CONTROL_NODE=false
 NET_DRIVE=false
 NFS_PATH="/mnt/shared_drive"
 
-if [[ "$EUID" -eq 0 ]]; then
-  error "This script should not be run as root. Please run as a regular user."
-  exit 1
-fi
-
 #Check for --control-node flag
 while [[ $# -gt 0 ]]; do
   case "$1" in
