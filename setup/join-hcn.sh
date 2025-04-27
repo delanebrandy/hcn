@@ -32,7 +32,7 @@ SSH_UNAME="$HCN_SSH_UNAME"
 
 info "Connecting to control node at $IP_ADDRESS as $SSH_UNAME..."
 info "Fetching join script..."
-scp "$SSH_UNAME@$IP_ADDRESS:~/join-command.sh" /tmp/join.sh  
+scp -i $KEY_FILE "$SSH_UNAME@$IP_ADDRESS:~/join-command.sh" /tmp/join.sh  
 chmod +x /tmp/join.sh
 
 info "Running join script..."
@@ -54,6 +54,6 @@ else
 fi
 
 mkdir -p ~/.kube
-scp "$SSH_UNAME@$IP_ADDRESS:~/.kube/config" ~/.kube/config
+scp -i /root/.ssh/id_rsa "$SSH_UNAME@$IP_ADDRESS:~/.kube/config" ~/.kube/config
 
 info "Node joined the HCN and is ready."

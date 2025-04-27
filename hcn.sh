@@ -102,11 +102,31 @@ ssh_setup() {
   get_control_info
 
   # Copy sshkey from control node
-  info "Copying SSH key from control node..."
-  mkdir -p /root/.ssh
-  ssh-keyscan -t rsa -H "$IP_ADDRESS" >> /root/.ssh/known_hosts
-  sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no "$SSH_UNAME@$IP_ADDRESS:~/.ssh/id_rsa" /root/.ssh/id_rsa
-  chmod 600 /root/.ssh/id_rsa
+  info "Generating  SSH keypair"
+
+  KEY_FILE="$HOME_DIR/id_rsa"
+  PUB_KEY_FILE="$KEY_FILE.pub"
+
+  if [[ ! -f $KEY_FILE ]]; then
+    ssh-keygen -t rsa -b 4096 -f "$KEY_FILE" -N "" -C "$SSH_UNAME@$IP_ADDRESS"
+  else
+    info "SSH keypair already exists at $KEY_FILE, skipping generation."
+  fi
+
+  mkdir -p "$HOME/.ssh"
+  ssh-keyscan -H "$IP_ADDRESS" >> "$HOME/.ssh/known_hosts" 2>/dev/null
+
+  sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no \
+    "$SSH_UNAME@$IP_ADDRESS" "mkdir -p ~/.ssh && chmod 700 ~/.ssh"
+
+  sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no \
+    "$PUB_KEY_FILE" "$SSH_UNAME@$IP_ADDRESS:~/.ssh/temp_key.pub"
+
+  sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no \
+    "$SSH_UNAME@$IP_ADDRESS" \
+    "cat ~/.ssh/temp_key.pub >> ~/.ssh/authorized_keys && \
+    chmod 600 ~/.ssh/authorized_keys && \
+    rm ~/.ssh/temp_key.pub"
 }
 
 save_info(){
@@ -122,6 +142,7 @@ export HCN_SSH_UNAME="${SSH_UNAME:-null}"
 export HCN_NFS_PATH="${NFS_PATH:-null}"
 export HCN_ORIG_USER="${USER:-user}"
 export HOME_DIR="${HOME:-/root}"
+export KEY_FILE="${KEY_FILE:-$HOME_DIR/id_rsa}"
 EOF
 
   info "Created global env script at $ENV_FILE."
