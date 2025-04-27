@@ -51,7 +51,8 @@ def classify(label, value):
 # ------------------------- Kubernetes Labeling --------------------------------
 def label_node(node, key, value):
     print(f"[kubectl] Labeling {node}: {key}={value}")
-    subprocess.run(["kubectl", "label", "node", node, f"{key}={value}", "--overwrite"], check=True)
+    
+    .run(["kubectl", "label", "node", node, f"{key}={value}", "--overwrite"], check=True)
 
 # ------------------------- Benchmark Parsing ----------------------------------
 def parse_results():
@@ -82,22 +83,7 @@ def parse_results():
     return results, platforms_supported
 
 # --------------------------- System Info Detection ----------------------------
-def detect_arch():
-    return platform.machine().lower()
 
-def detect_gpu_vendor():
-    if shutil.which("nvidia-smi"):
-        return "nvidia"
-    elif shutil.which("clinfo"):
-        try:
-            out = subprocess.check_output("clinfo", stderr=subprocess.DEVNULL).decode().lower()
-            if "intel" in out:
-                return "intel"
-            elif "amd" in out:
-                return "amd"
-        except Exception:
-            pass
-    return "unknown"
 
 def has_battery():
     try:
@@ -137,12 +123,8 @@ def main():
         label_node(node, "platforms", platforms_string)
 
     # Add architecture, vendor, and battery presence
-    arch = detect_arch()
-    vendor = detect_gpu_vendor()
     has_batt = "true" if has_battery() else "false"
 
-    label_node(node, "arch", arch)
-    label_node(node, "vendor", vendor)
     label_node(node, "has-battery", has_batt)
 
 if __name__ == "__main__":

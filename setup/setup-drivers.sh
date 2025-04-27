@@ -55,6 +55,8 @@ get_gpu_vendor() {
   fi
 }
 
+NODE_NAME=${NODE_NAME:-$(hostname)}
+
 info "Detecting GPU environment..."
 
 if is_wsl2; then
@@ -84,7 +86,7 @@ if is_wsl2; then
       mesa-vulkan-drivers mesa-utils vulkan-tools \
       nvidia-container-toolkit libvulkan1 pocl-opencl-icd
 
-    SUPPORTED_PLATFORMS=("cuda" "vulkan" "opengl")
+    kubectl label node "$NODE_NAME" cuda=true vulkan=true opengl=true --overwrite
 
     sudo nvidia-ctk runtime configure --runtime=docker 
     
@@ -104,7 +106,7 @@ if is_wsl2; then
       intel-opencl-icd intel-level-zero-gpu level-zero \
       mesa-vulkan-drivers vulkan-tools clinfo
 
-    SUPPORTED_PLATFORMS=("opencl" "vulkan" "opengl")
+    kubectl label node "$NODE_NAME" opencl=true vulkan=true opengl=true --overwrite
     info "Intel GPU drivers installed. Please run: wsl --shutdown and re-run this script."
 
   else
@@ -116,19 +118,19 @@ else
 
   if command -v clinfo &>/dev/null; then
     info "✔ OpenCL supported"
-    SUPPORTED_PLATFORMS+=("opencl")
+    kubectl label node "$NODE_NAME" opencl=true --overwrite
   fi
   if command -v nvidia-smi &>/dev/null; then
     info "✔ CUDA supported"
-    SUPPORTED_PLATFORMS+=("cuda")
+    kubectl label node "$NODE_NAME" cuda=true --overwrite
   fi
   if command -v vulkaninfo &>/dev/null; then
     info "✔ Vulkan supported"
-    SUPPORTED_PLATFORMS+=("vulkan")
+    kubectl label node "$NODE_NAME" vulkan=true --overwrite
   fi
   if command -v glxinfo &>/dev/null || command -v glxgears &>/dev/null; then
     info "✔ OpenGL supported"
-    SUPPORTED_PLATFORMS+=("opengl")
+    kubectl label node "$NODE_NAME" opengl=true --overwrite
   fi
 
   if [[ ${#SUPPORTED_PLATFORMS[@]} -eq 0 ]]; then

@@ -26,6 +26,11 @@ if [[ "$EUID" -ne 0 ]]; then
   exit 1
 fi
 
+has_label() {
+  kubectl get node "$NODE_NAME" \
+    -o jsonpath="{.metadata.labels.$1}" 2>/dev/null | grep -qx true
+}
+
 info "Starting performance tests – expect high system load."
 
 # ------------------------------------------------------------------------------
@@ -54,7 +59,7 @@ if [[ ! -f ~/.phoronix-test-suite/user-config.xml ]]; then
   printf 'y\nn\nn\nn\nn\nn\nn\n' | phoronix-test-suite batch-setup
 fi
 
-sed -i 's|<DynamicRunCount>TRUE</DynamicRunCount>|<DynamicRunCount>FALSE</DynamicRunCount>|' ~/.phoronix-test-suite/user-config.xml
+sed -i 's|<DynamicRunCount>TRUE</DynamicRunCount>|<DynamicRunCount>FALSE</DynamicRunCount>|' $HOME_DIR/.phoronix-test-suite/user-config.xml
 
 # ------------------------------------------------------------------------------
 # Run CPU Benchmarks
@@ -70,16 +75,16 @@ phoronix-test-suite batch-benchmark build-linux-kernel <<< 1
 
 info "Running GPU benchmarks (if supported)..."
 
-if [[ " ${SUPPORTED_PLATFORMS[*]} " =~ "opengl" ]]; then
+if has_label opengl; then
   phoronix-test-suite batch-benchmark unigine-heaven
 fi
-if [[ " ${SUPPORTED_PLATFORMS[*]} " =~ "opencl" ]]; then
+if has_label opencl; then
   phoronix-test-suite batch-benchmark juliagpu  ##blender inteloptic
 fi
-if [[ " ${SUPPORTED_PLATFORMS[*]} " =~ "vulkan" ]]; then
+if has_label vulkan; then
   phoronix-test-suite batch-benchmark vkmark 
 fi
-if [[ " ${SUPPORTED_PLATFORMS[*]} " =~ "cuda" ]]; then
+if has_label cuda; then
   phoronix-test-suite batch-benchmark octanebench
 fi
 
