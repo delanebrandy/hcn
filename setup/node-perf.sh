@@ -82,15 +82,14 @@ if is_wsl2; then
 
     apt-get install -y -qq build-essential software-properties-common \
       mesa-vulkan-drivers mesa-utils vulkan-tools \
-      nvidia-container-toolkit libvulkan1
+      nvidia-container-toolkit libvulkan1 pocl-opencl-icd
 
     SUPPORTED_PLATFORMS=("cuda" "vulkan" "opengl")
 
-    sudo nvidia-ctk runtime configure --runtime=docker
-    sudo systemctl restart docker
+    sudo nvidia-ctk runtime configure --runtime=docker 
     
     info "NVIDIA drivers installed. Please run: wsl --shutdown and re-run this script."
-    exit 0
+
 
   elif echo "$GPU_VENDOR" | grep -qi "intel"; then
     info "Intel GPU detected in WSL2. Installing OpenCL + Vulkan (Dozen) support..."
@@ -107,7 +106,7 @@ if is_wsl2; then
 
     SUPPORTED_PLATFORMS=("opencl" "vulkan" "opengl")
     info "Intel GPU drivers installed. Please run: wsl --shutdown and re-run this script."
-    exit 0
+
   else
     warn "Unsupported GPU vendor in WSL2: $GPU_VENDOR"
   fi
