@@ -44,6 +44,7 @@ fi
 # Detect if running in WSL2
 wsl2() {
   if [[ -f /proc/sys/kernel/osrelease ]] && grep -q "microsoft-standard" /proc/sys/kernel/osrelease; then
+    WSL=true
     return 0
   else
     return 1
@@ -143,6 +144,7 @@ export HCN_NFS_PATH="${NFS_PATH:-null}"
 export HCN_ORIG_USER="${USER:-user}"
 export HOME_DIR="${HOME:-/root}"
 export KEY_FILE="${KEY_FILE:-$HOME_DIR/id_rsa}"
+export WSL=${WSL:-false}
 EOF
 
   info "Created global env script at $ENV_FILE."
