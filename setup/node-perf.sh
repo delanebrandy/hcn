@@ -26,12 +26,19 @@ if [[ "$EUID" -ne 0 ]]; then
   exit 1
 fi
 
+if [[ -z "${HOME_DIR:-}" ]]; then
+  error "Required environment variable(s) not set: HOME_DIR"
+  exit 1
+fi
+
+DIR="$HOME_DIR"
+
 has_label() {
   kubectl get node "$NODE_NAME" \
     -o jsonpath="{.metadata.labels.$1}" 2>/dev/null | grep -qx true
 }
 
-info "Starting performance tests – expect high system load."
+info "Starting performance tests - expect high system load."
 
 # ------------------------------------------------------------------------------
 # Install Phoronix Test Suite
@@ -54,12 +61,12 @@ fi
 # Configure Phoronix Batch Mode
 # ------------------------------------------------------------------------------
 
-if [[ ! -f ~/.phoronix-test-suite/user-config.xml ]]; then
+if [[ ! -f $DIR/.phoronix-test-suite/user-config.xml ]]; then
   info "Configuring Phoronix batch mode..."
   printf 'y\nn\nn\nn\nn\nn\nn\n' | phoronix-test-suite batch-setup
 fi
 
-sed -i 's|<DynamicRunCount>TRUE</DynamicRunCount>|<DynamicRunCount>FALSE</DynamicRunCount>|' $HOME_DIR/.phoronix-test-suite/user-config.xml
+sed -i 's|<DynamicRunCount>TRUE</DynamicRunCount>|<DynamicRunCount>FALSE</DynamicRunCount>|' $DIR/.phoronix-test-suite/user-config.xml
 
 # ------------------------------------------------------------------------------
 # Run CPU Benchmarks

@@ -51,8 +51,7 @@ def classify(label, value):
 # ------------------------- Kubernetes Labeling --------------------------------
 def label_node(node, key, value):
     print(f"[kubectl] Labeling {node}: {key}={value}")
-    
-    .run(["kubectl", "label", "node", node, f"{key}={value}", "--overwrite"], check=True)
+    subprocess.run(["kubectl", "label", "node", node, f"{key}={value}", "--overwrite"], check=True)
 
 # ------------------------- Benchmark Parsing ----------------------------------
 def parse_results():
@@ -103,7 +102,8 @@ def main():
     results, platforms = parse_results()
 
     # Save raw parsed data
-    with open("node_performance.json", "w") as f:
+    output_path = Path.home() / "node_performance.json"
+    with open(output_path, "w") as f:
         json.dump({"node-performance": [results]}, f, indent=2)
 
     print("[✓] node_performance.json written")

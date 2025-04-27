@@ -134,7 +134,7 @@ else
   fi
 
   if [[ ${#SUPPORTED_PLATFORMS[@]} -eq 0 ]]; then
-    warn "No GPU platforms detected – GPU benchmarks will be skipped."
+    warn "No GPU platforms detected - GPU benchmarks will be skipped."
   else
     info "Detected GPU platforms: ${SUPPORTED_PLATFORMS[*]}"
   fi
