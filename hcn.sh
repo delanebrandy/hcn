@@ -136,14 +136,14 @@ main() {
   info "Starting HCN Setup"
   # Install dependencies
   info "Updating and upgrading system packages..."
-  apt-get update -qq
-  apt-get upgrade -y -qq
+  apt-get update -qq > /dev/null 2>&1
+  apt-get upgrade -y -qq > /dev/null 2>&1
 
   info "Installing dependencies..."
-  apt-get install -y -qq sshpass clinfo upower
+  apt-get install -y -qq sshpass clinfo upower iptables > /dev/null 2>&1
 
   info "Installing Python dependencies…"
-  apt-get install -y -qq python3 python3-pip python3-venv python3-psutil
+  apt-get install -y -qq python3 python3-pip python3-venv python3-psutil > /dev/null 2>&1
   #pip3 install -r requirements.txt
 
   # Run node setup

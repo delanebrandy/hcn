@@ -31,7 +31,7 @@ SERVICE_PATH="/etc/systemd/system/$SERVICE_NAME"
 # Copy script into place
 info "Installing dynamic node labelling script..."
 if [[ ! -f "$SCRIPT_PATH" ]]; then
-  cp "$SCRIPT_NAME" "$SCRIPT_PATH"
+  cp "./$SCRIPT_NAME" "$SCRIPT_PATH"
   chmod +x "$SCRIPT_PATH"
 else
   info "Script already exists at $SCRIPT_PATH"

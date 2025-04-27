@@ -208,7 +208,6 @@ fi
 # Verify Kubernetes components
 if command_exists kubelet; then
   kubelet --version
-  check_service_status kubelet
 else
   error "kubelet command not found!"
 fi
