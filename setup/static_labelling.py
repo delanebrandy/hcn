@@ -16,19 +16,19 @@ import os
 
 LABEL_MAP = {
     "build-linux-kernel": "cpu",
-    "vkmark": "gpu-vulkan",
-    "unigine-heaven": "gpu-opengl",
-    "octanebench": "gpu-cuda",
-    "juliagpu": "gpu-opencl",
+    "vkmark":             "gpu-vulkan",
+    "unigine-heaven":     "gpu-opengl",
+    "octanebench":        "gpu-cuda",
+    "juliagpu":           "gpu-opencl",
 }
 
 # ----------------------- Threshold Configuration ------------------------------
 THRESHOLDS = {
-    "cpu": {"high": 60, "mid": 120},           # lower is better (seconds)
-    "gpu-vulkan": {"low": 20, "mid": 60},      # higher is better (FPS)
-    "gpu-opengl": {"low": 20, "mid": 60},
-    "gpu-cuda": {"low": 20, "mid": 60},
-    "gpu-opencl": {"low": 20, "mid": 60},
+    "cpu":         {"mid": 80, "high": 140},       # higer is better (seconds)
+    "gpu-vulkan":  {"low": 20, "mid": 60},         # higher is better (FPS)
+    "gpu-opengl":  {"low": 20, "mid": 60},
+    "gpu-cuda":    {"low": 20, "mid": 60},
+    "gpu-opencl":  {"low": 20, "mid": 60},
 }
 
 # ------------------------- Classification Logic -------------------------------
@@ -51,7 +51,10 @@ def classify(label, value):
 # ------------------------- Kubernetes Labeling --------------------------------
 def label_node(node, key, value):
     print(f"[kubectl] Labeling {node}: {key}={value}")
-    subprocess.run(["kubectl", "label", "node", node, f"{key}={value}", "--overwrite"], check=True)
+    subprocess.run(
+        ["kubectl", "label", "node", node, f"{key}={value}", "--overwrite"],
+        check=True
+    )
 
 # ------------------------- Benchmark Parsing ----------------------------------
 def parse_results():
@@ -65,8 +68,8 @@ def parse_results():
             if not test_id:
                 continue
 
-            short = test_id.split("/")[-1]         # e.g. build-linux-kernel-1.16.0
-            base = short.split("-")[0]             # e.g. build-linux-kernel
+            short = test_id.split("/")[-1]
+            base  = short.rsplit("-", 1)[0]           # "build-linux-kernel"
             label = LABEL_MAP.get(base)
             if not label:
                 continue
@@ -82,8 +85,6 @@ def parse_results():
     return results, platforms_supported
 
 # --------------------------- System Info Detection ----------------------------
-
-
 def has_battery():
     try:
         power_devices = subprocess.check_output(["upower", "-e"]).decode().splitlines()
@@ -102,11 +103,11 @@ def main():
     results, platforms = parse_results()
 
     # Save raw parsed data
-    output_path = Path.home() / "node_performance.json"
+    output_path = Path.home() / "hcn/node_performance.json"
     with open(output_path, "w") as f:
         json.dump({"node-performance": [results]}, f, indent=2)
 
-    print("[✓] node_performance.json written")
+    print("node_performance.json written")
 
     for label, value in results.items():
         if value is None:
@@ -116,15 +117,12 @@ def main():
         key = label.replace("gpu-", "gpu") if label.startswith("gpu-") else label
         label_node(node, key, perf_class)
 
-    # Combine supported platforms into a single label
     platforms_flat = [p.replace("gpu-", "") for p in platforms if p != "cpu"]
     if platforms_flat:
         platforms_string = ",".join(sorted(platforms_flat))
         label_node(node, "platforms", platforms_string)
 
-    # Add architecture, vendor, and battery presence
     has_batt = "true" if has_battery() else "false"
-
     label_node(node, "has-battery", has_batt)
 
 if __name__ == "__main__":
