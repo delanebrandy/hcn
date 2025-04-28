@@ -1,26 +1,33 @@
-FROM nvidia/cuda:12.2.0-runtime-ubuntu22.04
+FROM nvidia/cuda:12.2.0-cudnn8-runtime-ubuntu22.04
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 python3-pip git wget ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+    python3.9 python3.9-distutils python3.9-venv wget git ffmpeg \
+  && rm -rf /var/lib/apt/lists/*
 
-# Install Python packages
-RUN pip3 install --upgrade pip
-RUN pip3 install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu121
+RUN wget https://bootstrap.pypa.io/get-pip.py \
+  && python3.9 get-pip.py \
+  && rm get-pip.py
 
-# Install Real-ESRGAN
-RUN git clone https://github.com/xinntao/Real-ESRGAN.git /workspace/Real-ESRGAN
-WORKDIR /workspace/Real-ESRGAN
-RUN pip3 install -r requirements.txt
-RUN python3 setup.py develop
+RUN python3.9 -m pip install --upgrade pip
 
-# Install FastAPI and Uvicorn for API serving
-RUN pip3 install fastapi uvicorn python-multipart pillow
+RUN python3.9 -m pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu122 \
+    || python3.9 -m pip install torch torchvision
 
-# Copy server script
-COPY server.py /workspace/server.py
+RUN python3.9 -m pip install \ 
+    realesrgan basicsr opencv-python-headless psutil \
+    fastapi uvicorn[standard] python-multipart requests tqdm
+
+ENV WEIGHTS_DIR=/workspace/weights \
+    MODEL_NAME=RealESRGAN_x4plus.pth \
+    MODEL_URL=https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/${MODEL_NAME}
+RUN mkdir -p ${WEIGHTS_DIR} \
+  && if [ ! -f ${WEIGHTS_DIR}/${MODEL_NAME} ]; then \
+       wget -qO ${WEIGHTS_DIR}/${MODEL_NAME} ${MODEL_URL}; \
+     fi
+
+WORKDIR /workspace
+
+COPY server.py video_upscale_client.py ./
 
 EXPOSE 5000
-
-ENTRYPOINT ["python3", "server.py"]
+ENTRYPOINT ["python3.9", "-m", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "5000"]

@@ -61,4 +61,4 @@ fi
 info "Deploying Real-ESRGAN services to Kubernetes..."
 kubectl apply -f real-esrgan-deployment-final.yaml
 
-info "✅ Real-ESRGAN deployment complete!"
+info "Real-ESRGAN deployment complete!"
