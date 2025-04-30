@@ -45,14 +45,6 @@ else
   exit 1
 fi
 
-info "Checking node readiness..."
-if kubectl get nodes 2>/dev/null | grep -q "Ready"; then
-  info "Node is ready."
-else
-  error "Node is not ready."
-  exit 1
-fi
-
 mkdir -p /root/.kube
 scp -i $HOME/.ssh/id_rsa "$SSH_UNAME@$IP_ADDRESS:/home/${SSH_UNAME}/.kube/config" /root/.kube/config
 chown root:root /root/.kube/config
@@ -63,5 +55,12 @@ cp /root/.kube/config "$HOME_DIR/.kube/config"
 chown "$HCN_ORIG_USER:$HCN_ORIG_USER" "$HOME_DIR/.kube/config"
 chmod 600 "$HOME_DIR/.kube/config"
 
+info "Checking node readiness..."
+if kubectl get nodes 2>/dev/null | grep -q "Ready"; then
+  info "Node is ready."
+else
+  error "Node is not ready."
+  exit 1
+fi
 
 info "Node joined the HCN and is ready."
