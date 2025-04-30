@@ -14,12 +14,6 @@ NC='\033[0m'
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-# Validate required environment variables
-if [[ -z "${HCN_IP_ADDRESS:-}" || -z "${HCN_SSH_UNAME:-}" ]]; then
-  error "Missing environment variables: HCN_IP_ADDRESS or HCN_SSH_UNAME"
-  exit 1
-fi
-
 SERVICE_NAME="dynamic-labelling.service"
 PWS_PATH="/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
 SCRIPT0_NAME="monitor_status.py"
