@@ -61,6 +61,9 @@ fi
 # Configure Phoronix Batch Mode
 # ------------------------------------------------------------------------------
 
+# Initialize Phoronix Test Suite
+phoronix-test-suite
+
 if [[ ! -f $DIR/.phoronix-test-suite/user-config.xml ]]; then
   info "Configuring Phoronix batch mode..."
   printf 'y\nn\nn\nn\nn\nn\nn\n' | phoronix-test-suite batch-setup
