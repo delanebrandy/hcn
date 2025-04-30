@@ -36,7 +36,7 @@ fi
 info "Creating dynamic‐labelling wrapper script..."
 cat <<EOF > /usr/local/bin/dynamic-labelling.sh
 #!/bin/bash
-"\$PWS_PATH" python "\$SCRIPT0_PATH" | python3 "\$SCRIPT1_PATH"
+"$PWS_PATH" python "$SCRIPT0_PATH" | python3 "$SCRIPT1_PATH"
 EOF
 chmod +x /usr/local/bin/dynamic-labelling.sh
 
