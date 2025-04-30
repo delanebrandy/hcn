@@ -62,7 +62,7 @@ fi
 # ------------------------------------------------------------------------------
 
 # Initialise Phoronix Test Suite
-phoronix-test-suite > /dev/null 2>&1
+sudo -u "$HCN_ORIG_USER" phoronix-test-suite > /dev/null 2>&1
 
 if [[ ! -f $DIR/.phoronix-test-suite/user-config.xml ]]; then
   info "Configuring Phoronix batch mode..."
