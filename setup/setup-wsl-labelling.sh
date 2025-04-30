@@ -33,6 +33,13 @@ else
   info "Scripts already exist at $SCRIPT0_PATH and $SCRIPT1_PATH"
 fi
 
+info "Creating dynamic‐labelling wrapper script..."
+cat <<EOF > /usr/local/bin/dynamic-labelling.sh
+#!/bin/bash
+"\$PWS_PATH" python "\$SCRIPT0_PATH" | python3 "\$SCRIPT1_PATH"
+EOF
+chmod +x /usr/local/bin/dynamic-labelling.sh
+
 # Write systemd service file
 info "Configuring systemd service..."
 cat <<EOF > "$SERVICE_PATH"
@@ -41,7 +48,7 @@ Description=Dynamic Node Labelling Service (WSL2)
 After=network.target
 
 [Service]
-ExecStart=$PWS_PATH python $SCRIPT0_PATH | python3 $SCRIPT1_PATH
+ExecStart=/usr/local/bin/dynamic-labelling.sh
 Restart=on-failure
 User=root
 Environment=PATH=/usr/bin:/usr/local/bin
