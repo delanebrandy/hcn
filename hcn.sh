@@ -105,7 +105,10 @@ ssh_setup() {
   # Copy sshkey from control node
   info "Generating  SSH keypair"
 
-  KEY_FILE="$HOME_DIR/id_rsa"
+  mkdir -p "$HOME/.ssh"
+  chmod 700 "$HOME/.ssh"
+
+  KEY_FILE="$HOME/.ssh/id_rsa"
   PUB_KEY_FILE="$KEY_FILE.pub"
 
   if [[ ! -f $KEY_FILE ]]; then

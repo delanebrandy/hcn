@@ -53,7 +53,15 @@ else
   exit 1
 fi
 
-mkdir -p ~/.kube
-scp -i /root/.ssh/id_rsa "$SSH_UNAME@$IP_ADDRESS:~/.kube/config" ~/.kube/config
+mkdir -p /root/.kube
+scp -i $HOME/.ssh/id_rsa "$SSH_UNAME@$IP_ADDRESS:/home/${SSH_UNAME}/.kube/config" /root/.kube/config
+chown root:root /root/.kube/config
+chmod 600 /root/.kube/config
+
+mkdir -p "$HOME_DIR/.kube"
+cp /root/.kube/config "$HOME_DIR/.kube/config"
+chown "$HCN_ORIG_USER:$HCN_ORIG_USER" "$HOME_DIR/.kube/config"
+chmod 600 "$HOME_DIR/.kube/config"
+
 
 info "Node joined the HCN and is ready."
