@@ -22,7 +22,7 @@ BATTERY_THRESHOLD = 70
 SAMPLE_INTERVAL = 60     
 
 def get_node_name():
-    return subprocess.check_output(NODE_NAME_CMD).decode().strip()
+    return subprocess.check_output(NODE_NAME_CMD).decode().strip().lower()
 
 
 def is_plugged_in_and_sufficient():

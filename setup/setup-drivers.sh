@@ -55,7 +55,7 @@ get_gpu_vendor() {
   fi
 }
 
-NODE_NAME=$(hostname)
+NODE_NAME=${HOSTNAME,,}
 
 info "Detecting GPU environment..."
 

@@ -34,7 +34,7 @@ fi
 DIR="$HOME_DIR"
 
 has_label() {
-  kubectl get node $(hostname) \
+  kubectl get node "${HOSTNAME,,}" \
     -o jsonpath="{.metadata.labels.$1}" 2>/dev/null | grep -qx true
 }
 
