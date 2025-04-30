@@ -75,7 +75,7 @@ fi
 
 
 info "Installing prerequisites..."
-apt-get -yqq install apt-transport-https ca-certificates curl gnupg lsb-release openssh-client
+apt-get -yqq install apt-transport-https ca-certificates curl gnupg lsb-release openssh-client > /dev/null 2>&1
 
 ################################################################################
 # Docker Installation
@@ -110,10 +110,10 @@ echo \
   tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 # Update package lists to include Docker packages
-apt-get -yqq  update
+apt-get -yqq update > /dev/null 2>&1
 
 info "Installing Docker Engine and related components..."
-apt-get -yqq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+apt-get -yqq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin > /dev/null 2>&1
 
 info "Enabling and starting Docker service..."
 systemctl enable --now docker
@@ -134,11 +134,11 @@ echo \
   tee /etc/apt/sources.list.d/kubernetes.list
 
 # Update package lists to include Kubernetes packages
-apt-get -yqq  update
+apt-get -yqq update > /dev/null 2>&1
 
 info "Installing kubelet, kubeadm, and kubectl..."
-apt-get -yqq install kubelet kubeadm kubectl
-apt-mark hold kubelet kubeadm kubectl
+apt-get -yqq install kubelet kubeadm kubectl > /dev/null 2>&1
+apt-mark hold kubelet kubeadm kubectl > /dev/null 2>&1
 
 info "Enabling kubelet service..."
 systemctl enable --now kubelet

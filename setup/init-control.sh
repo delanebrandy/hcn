@@ -46,7 +46,7 @@ fi
 
 ## Common init steps
 info "Installing dependencies..."
-apt-get -yqq install openssh-server 
+apt-get -yqq install openssh-server > /dev/null 2>&1
 
 ./init.sh
 

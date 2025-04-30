@@ -65,22 +65,22 @@ if is_wsl2; then
 
   if echo "$GPU_VENDOR" | grep -qi "nvidia"; then
     info "NVIDIA GPU detected in WSL2. Installing CUDA + Vulkan support..."
-    apt-get -yqq update
+    apt-get -yqq update > /dev/null 2>&1
 
     wget https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-wsl-ubuntu.pin
     sudo mv cuda-wsl-ubuntu.pin /etc/apt/preferences.d/cuda-repository-pin-600
     wget https://developer.download.nvidia.com/compute/cuda/12.8.1/local_installers/cuda-repo-wsl-ubuntu-12-8-local_12.8.1-1_amd64.deb
     sudo dpkg -i cuda-repo-wsl-ubuntu-12-8-local_12.8.1-1_amd64.deb
     sudo cp /var/cuda-repo-wsl-ubuntu-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/
-    sudo apt-get -yqq update
-    sudo apt-get -yqq  install cuda-toolkit-12-8
+    sudo apt-get -yqq update > /dev/null 2>&1
+    sudo apt-get -yqq  install cuda-toolkit-12-8 > /dev/null 2>&1
 
     curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
     && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
     sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
     sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
 
-    sudo apt-get -yqq update
+    sudo apt-get -yqq update > /dev/null 2>&1
 
     apt-get -yqq install build-essential software-properties-common \
       mesa-vulkan-drivers mesa-utils vulkan-tools \
@@ -95,16 +95,16 @@ if is_wsl2; then
 
   elif echo "$GPU_VENDOR" | grep -qi "intel"; then
     info "Intel GPU detected in WSL2. Installing OpenCL + Vulkan (Dozen) support..."
-    apt-get -yqq update
-    apt-get -yqq install gpg-agent wget
+    apt-get -yqq update > /dev/null 2>&1
+    apt-get -yqq install gpg-agent wget > /dev/null 2>&1
     wget -qO - https://repositories.intel.com/graphics/intel-graphics.key | \
       gpg --dearmor -o /usr/share/keyrings/intel-graphics.gpg
     echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/intel-graphics.gpg] https://repositories.intel.com/graphics/ubuntu focal-devel main' \
       > /etc/apt/sources.list.d/intel.gpu.focal.list
-    apt-get -yqq update
+    apt-get -yqq update > /dev/null 2>&1
     apt-get -yqq install \
       intel-opencl-icd intel-level-zero-gpu level-zero \
-      mesa-vulkan-drivers vulkan-tools clinfo
+      mesa-vulkan-drivers vulkan-tools clinfo > /dev/null 2>&1
 
     kubectl label node "$NODE_NAME" opencl=true vulkan=true opengl=true --overwrite
     info "Intel GPU drivers installed. Please run: wsl --shutdown and re-run this script."

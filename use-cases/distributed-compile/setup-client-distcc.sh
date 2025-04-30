@@ -18,8 +18,8 @@ fi
 
 # --- 1. Install dependencies ---
 info "Installing distcc and ccache..."
-apt-get -yqq update 
-apt-get -yqq install ccache distcc
+apt-get -yqq update > /dev/null 2>&1
+apt-get -yqq install ccache distcc > /dev/null 2>&1
 
 if [ ! -e "/.distcc/hosts" ]; then
   info "File /.distcc/hosts does not exist. Creating it..."
