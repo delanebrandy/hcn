@@ -20,19 +20,21 @@ if [[ -z "${HCN_IP_ADDRESS:-}" || -z "${HCN_SSH_UNAME:-}" ]]; then
   exit 1
 fi
 
-IP_ADDRESS="$HCN_IP_ADDRESS"
-SSH_UNAME="$HCN_SSH_UNAME"
-
 SERVICE_NAME="dynamic-labelling.service"
-SCRIPT_NAME="dynamic_labelling.py"
-SCRIPT_PATH="/usr/local/bin/$SCRIPT_NAME"
+PWS_PATH="/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
+SCRIPT0_NAME="monitor_status.py"
+SCRIPT0_PATH="/usr/local/bin/$SCRIPT_NAME"
+SCRIPT1_NAME="wsl_dynamic_labelling.py"
+SCRIPT1_PATH="/usr/local/bin/$SCRIPT_NAME"
 SERVICE_PATH="/etc/systemd/system/$SERVICE_NAME"
 
 # Copy script into place
 info "Installing dynamic node labelling script..."
 if [[ ! -f "$SCRIPT_PATH" ]]; then
-  cp "./setup/$SCRIPT_NAME" "$SCRIPT_PATH"
-  chmod +x "$SCRIPT_PATH"
+  cp "./setup/$SCRIPT0_NAME" "$SCRIPT1_PATH"
+  cp "./setup/$SCRIPT1_NAME" "$SCRIPT1_PATH"
+  chmod +x "$SCRIPT0_PATH"
+  chmod +x "$SCRIPT1_PATH"
 else
   info "Script already exists at $SCRIPT_PATH"
 fi
@@ -45,7 +47,7 @@ Description=Dynamic Node Labelling Service (WSL2)
 After=network.target
 
 [Service]
-ExecStart=powershell.exe python $SCRIPT_PATH $SSH_UNAME $IP_ADDRESS
+ExecStart=$PWS_PATH python $SCRIPT0_PATH | python3 $SCRIPT1_PATH
 Restart=on-failure
 User=root
 Environment=PATH=/usr/bin:/usr/local/bin
