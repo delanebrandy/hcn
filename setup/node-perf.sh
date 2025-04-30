@@ -34,7 +34,7 @@ fi
 DIR="$HOME_DIR"
 
 has_label() {
-  kubectl get node "$NODE_NAME" \
+  kubectl get node $(hostname) \
     -o jsonpath="{.metadata.labels.$1}" 2>/dev/null | grep -qx true
 }
 
@@ -61,8 +61,8 @@ fi
 # Configure Phoronix Batch Mode
 # ------------------------------------------------------------------------------
 
-# Initialize Phoronix Test Suite
-phoronix-test-suite
+# Initialise Phoronix Test Suite
+phoronix-test-suite > /dev/null 2>&1
 
 if [[ ! -f $DIR/.phoronix-test-suite/user-config.xml ]]; then
   info "Configuring Phoronix batch mode..."
