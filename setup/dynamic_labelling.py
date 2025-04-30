@@ -14,7 +14,7 @@ import sys
 
 NODE_NAME_CMD = ["hostname"]
 LABEL_CMD = "kubectl label node {node} {key}={value} --overwrite"
-UNLABEL_CMD = "kubectl label node {node} {key}-"
+TAINT_CMD = "kubectl taint node {node} {key}={value}:NoSchedule --overwrite"
 
 # Configurable thresholds
 CPU_IDLE_THRESHOLD = 30  
@@ -43,10 +43,10 @@ def label_node(node, key, value):
     subprocess.run(cmd, check=True)
 
 
-def unlabel_node(node, key):
-    # build remote kubectl unlabel command
-    cmd = UNLABEL_CMD.format(node=node, key=key).split()
-    subprocess.run(cmd, check=True)
+def taint_node(node, key, value):
+    # build remote kubectl taint command
+    label_node(node, key, value)
+    cmd = TAINT_CMD.format(node=node, key=key, value=value).split()
 
 
 def monitor():
@@ -63,7 +63,8 @@ def monitor():
                 label_node(node, "idle", "true")
             else:
                 print("[Monitor] Node is busy or on battery — removing label idle")
-                unlabel_node(node, "idle")
+                taint_node(node, "idle", "false")
+                
         except subprocess.CalledProcessError as e:
             print(f"[Monitor] Failed to label node: {e}")
 
