@@ -22,7 +22,7 @@ SERVER_IP="$1"
 MOUNT_POINT="/mnt/shared_drive"
 
 info "Installing NFS client..."
-apt-get -y -qq install nfs-common
+apt-get -yqq   install nfs-common
 
 info "Creating mount point..."
 mkdir -p $MOUNT_POINT 
