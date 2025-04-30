@@ -14,7 +14,7 @@ import sys
 
 NODE_NAME_CMD = ["hostname"]
 LABEL_CMD = "kubectl label node {node} {key}={value} --overwrite"
-TAINT_CMD = "kubectl taint node {node} {key}={value}:NoSchedule --overwrite"
+TAINT_CMD = "kubectl taint node {node} {key}={value}:NoExecute --overwrite"
 
 # Configurable thresholds
 CPU_IDLE_THRESHOLD = 30  

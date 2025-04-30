@@ -15,7 +15,7 @@ def label_node(node, key, value):
 def taint_node(node, key, value):
     # keep the label in sync, then taint
     label_node(node, key, value)
-    cmd = TAINT_CMD + [node, f"{key}={value}:NoSchedule", "--overwrite"]
+    cmd = TAINT_CMD + [node, f"{key}={value}:NoExecute", "--overwrite"]
     subprocess.run(cmd, check=True)
 
 def main():
