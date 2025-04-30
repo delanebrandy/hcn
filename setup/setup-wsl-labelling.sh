@@ -17,20 +17,20 @@ error() { echo -e "${RED}[ERROR]${NC} $*"; }
 SERVICE_NAME="dynamic-labelling.service"
 PWS_PATH="/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
 SCRIPT0_NAME="monitor_status.py"
-SCRIPT0_PATH="/usr/local/bin/$SCRIPT_NAME"
+SCRIPT0_PATH="/usr/local/bin/$SCRIPT0_NAME"
 SCRIPT1_NAME="wsl_dynamic_labelling.py"
-SCRIPT1_PATH="/usr/local/bin/$SCRIPT_NAME"
+SCRIPT1_PATH="/usr/local/bin/$SCRIPT1_NAME"
 SERVICE_PATH="/etc/systemd/system/$SERVICE_NAME"
 
 # Copy script into place
 info "Installing dynamic node labelling script..."
-if [[ ! -f "$SCRIPT_PATH" ]]; then
-  cp "./setup/$SCRIPT0_NAME" "$SCRIPT1_PATH"
+if [[ ! -f "$SCRIPT0_PATH" || ! -f "$SCRIPT1_PATH" ]]; then
+  cp "./setup/$SCRIPT0_NAME" "$SCRIPT0_PATH"
   cp "./setup/$SCRIPT1_NAME" "$SCRIPT1_PATH"
   chmod +x "$SCRIPT0_PATH"
   chmod +x "$SCRIPT1_PATH"
 else
-  info "Script already exists at $SCRIPT_PATH"
+  info "Scripts already exist at $SCRIPT0_PATH and $SCRIPT1_PATH"
 fi
 
 # Write systemd service file
