@@ -64,10 +64,8 @@ fi
 # Initialise Phoronix Test Suite
 sudo -u "$HCN_ORIG_USER" phoronix-test-suite > /dev/null 2>&1
 
-if [[ ! -f $DIR/.phoronix-test-suite/user-config.xml ]]; then
-  info "Configuring Phoronix batch mode..."
-  printf 'y\nn\nn\nn\nn\nn\nn\n' | phoronix-test-suite batch-setup
-fi
+info "Configuring Phoronix batch mode..."
+printf 'y\nn\nn\nn\nn\nn\nn\n' | phoronix-test-suite batch-setup
 
 sed -i 's|<DynamicRunCount>TRUE</DynamicRunCount>|<DynamicRunCount>FALSE</DynamicRunCount>|' $DIR/.phoronix-test-suite/user-config.xml
 

@@ -84,7 +84,7 @@ if is_wsl2; then
 
     apt-get -yqq install build-essential software-properties-common \
       mesa-vulkan-drivers mesa-utils vulkan-tools \
-      nvidia-container-toolkit libvulkan1 pocl-opencl-icd
+      nvidia-container-toolkit libvulkan1 pocl-opencl-icd > /dev/null 2>&1
 
     kubectl label node "$NODE_NAME" cuda=true vulkan=true opengl=true --overwrite
 
