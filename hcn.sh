@@ -219,6 +219,7 @@ main() {
     fi
   fi
 
+  info "HCN setup complete!"
 }
 
 main "$@"
