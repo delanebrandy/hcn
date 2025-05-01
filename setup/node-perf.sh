@@ -90,7 +90,7 @@ if has_label opencl; then
   phoronix-test-suite batch-benchmark juliagpu  ##blender inteloptic
 fi
 if has_label vulkan; then
-  phoronix-test-suite batch-benchmark vkmark 
+  phoronix-test-suite batch-benchmark vkmark
 fi
 if has_label cuda; then
   phoronix-test-suite batch-benchmark octanebench

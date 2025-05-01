@@ -38,7 +38,7 @@ wsl2() {
 }
 
 if wsl2 || $force; then
-  error "WSL2 is unsupported for the control plane, 
+  error "WSL2 is unsupported for the control plane,
   please run this script on a native Linux system.
   or override the check by running the script with the --force flag."
   exit 1

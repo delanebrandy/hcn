@@ -13,7 +13,7 @@ RUN python3.9 -m pip install --upgrade pip
 RUN python3.9 -m pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu122 \
     || python3.9 -m pip install torch torchvision
 
-RUN python3.9 -m pip install \ 
+RUN python3.9 -m pip install \
     realesrgan basicsr opencv-python-headless psutil \
     fastapi uvicorn[standard] python-multipart requests tqdm
 

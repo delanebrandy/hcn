@@ -14,7 +14,7 @@ NC='\033[0m'
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-ORIG_USER="null" 
+ORIG_USER="null"
 CONTROL_NODE=false
 NET_DRIVE=false
 NFS_PATH="/mnt/shared_drive"
@@ -138,7 +138,7 @@ save_info(){
 
   # Create global env script
   ENV_FILE="/etc/profile.d/hcn-env.sh"
-  cat > "$ENV_FILE" << EOF 
+  cat > "$ENV_FILE" << EOF
 #!/bin/sh
 export HCN_HOSTNAME="${HCN_HOSTNAME:-control-plane}"
 export HCN_IP_ADDRESS="${IP_ADDRESS:-$(hostname -I | awk '{print $1}')}"

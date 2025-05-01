@@ -33,7 +33,7 @@ else
   info "Scripts already exist at $SCRIPT0_PATH and $SCRIPT1_PATH"
 fi
 
-info "Creating dynamic‐labelling wrapper script..."
+info "Creating dynamic-labelling wrapper script..."
 cat <<EOF > /usr/local/bin/dynamic-labelling.sh
 #!/bin/bash
 "$PWS_PATH" python "$SCRIPT0_PATH" | python3 "$SCRIPT1_PATH"

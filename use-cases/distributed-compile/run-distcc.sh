@@ -45,7 +45,6 @@ insecure = true
 EOF
 
 echo "Generated buildkitd.toml"
- 
 
     info "Creating new buildx builder..."
     docker buildx create --name multiarch --config ./buildkitd.toml --use

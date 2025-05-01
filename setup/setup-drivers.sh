@@ -88,8 +88,8 @@ if is_wsl2; then
 
     kubectl label node "$NODE_NAME" cuda=true vulkan=true opengl=true --overwrite
 
-    sudo nvidia-ctk runtime configure --runtime=docker 
-    
+    sudo nvidia-ctk runtime configure --runtime=docker
+
     info "NVIDIA drivers installed. Please run: wsl --shutdown and re-run this script."
 
 

@@ -13,4 +13,4 @@ USER distcc
 
 EXPOSE 3632
 
-CMD ["distccd","--no-detach","--daemon","--jobs","$(nproc)","--allow","${ALLOW}","--log-stderr"] 
+CMD ["distccd","--no-detach","--daemon","--jobs","$(nproc)","--allow","${ALLOW}","--log-stderr"]
