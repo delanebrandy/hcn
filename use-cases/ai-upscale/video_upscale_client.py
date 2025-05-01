@@ -11,7 +11,6 @@ from tqdm import tqdm
 
 
 def extract_frames(video_path, frames_dir):
-    """Extract frames from the input video."""
     os.makedirs(frames_dir, exist_ok=True)
     cmd = [
         'ffmpeg', '-i', video_path,
@@ -20,7 +19,6 @@ def extract_frames(video_path, frames_dir):
     subprocess.run(cmd, check=True)
 
 def upscale_frame(frame_path, output_path, server_url):
-    """Send a frame to Real-ESRGAN server and save output."""
     with open(frame_path, 'rb') as f:
         files = {'file': f}
         response = requests.post(f'{server_url}/upscale', files=files)
@@ -31,7 +29,6 @@ def upscale_frame(frame_path, output_path, server_url):
             raise Exception(f"Failed to upscale {frame_path}: {response.text}")
 
 def reassemble_video(upscaled_frames_dir, output_video_path, fps=30):
-    """Reassemble upscaled frames into a video."""
     cmd = [
         'ffmpeg', '-r', str(fps), '-i',
         os.path.join(upscaled_frames_dir, 'frame_%06d.png'),
