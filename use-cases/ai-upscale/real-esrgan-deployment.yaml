@@ -2,11 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: real-esrgan
-  namespace: ai  # You can change to whatever namespace you're using
+  namespace: ai
   labels:
     app: real-esrgan
 spec:
-  replicas: 2  # Start with 2 pods (scale up if needed)
   selector:
     matchLabels:
       app: real-esrgan
@@ -17,12 +16,12 @@ spec:
     spec:
       containers:
       - name: real-esrgan
-        image: registry/real-esrgan:latest  # Replace with your actual registry if needed
+        image: registry/real-esrgan:latest
         ports:
         - containerPort: 5000
         resources:
           limits:
-            nvidia.com/gpu: 1  # Request a full GPU
+            nvidia.com/gpu: 1
           requests:
             cpu: "500m"
             memory: "512Mi"
@@ -31,8 +30,8 @@ spec:
           value: "all"
       restartPolicy: Always
       nodeSelector:
-        gpu: high
-        platforms: cuda
+        gpu-cuda: high
+        cuda: "true"
 ---
 apiVersion: v1
 kind: Service

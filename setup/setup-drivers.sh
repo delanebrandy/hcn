@@ -82,9 +82,9 @@ if is_wsl2; then
 
     sudo apt-get -yqq update > /dev/null 2>&1
 
-    apt-get -yqq install build-essential software-properties-common \
-      mesa-vulkan-drivers mesa-utils vulkan-tools \
-      nvidia-container-toolkit libvulkan1 pocl-opencl-icd > /dev/null 2>&1
+    apt-get -yqq install build-essential software-properties-common freeglut3-dev \
+      mesa-vulkan-drivers mesa-utils vulkan-tools libgl1-mesa-glx libglu1-mesa-dev  \
+      nvidia-container-toolkit libvulkan1 pocl-opencl-icd mesa-common-dev > /dev/null 2>&1
 
     kubectl label node "$NODE_NAME" cuda=true vulkan=true opengl=true --overwrite
 
@@ -103,8 +103,8 @@ if is_wsl2; then
       > /etc/apt/sources.list.d/intel.gpu.focal.list
     apt-get -yqq update > /dev/null 2>&1
     apt-get -yqq install \
-      intel-opencl-icd intel-level-zero-gpu level-zero \
-      mesa-vulkan-drivers vulkan-tools clinfo > /dev/null 2>&1
+      intel-opencl-icd intel-level-zero-gpu level-zero mesa-utils libgl1-mesa-glx   \
+      mesa-vulkan-drivers vulkan-tools libglu1-mesa-dev freeglut3-dev mesa-common-dev clinfo > /dev/null 2>&1
 
     kubectl label node "$NODE_NAME" opencl=true vulkan=true opengl=true --overwrite
     info "Intel GPU drivers installed. Please run: wsl --shutdown and re-run this script."
