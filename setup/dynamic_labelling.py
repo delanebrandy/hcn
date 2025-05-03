@@ -10,7 +10,7 @@ UNTAINT_CMD = "kubectl taint node {node} {key}={value}:NoExecute- --overwrite"
 
 CPU_IDLE_THRESHOLD = 30
 BATTERY_THRESHOLD = 70
-SAMPLE_INTERVAL = 60
+SAMPLE_INTERVAL = 30
 
 def get_node_name():
     return subprocess.check_output(NODE_NAME_CMD).decode().strip().lower()

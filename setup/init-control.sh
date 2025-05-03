@@ -53,6 +53,21 @@ apt-get -yqq install openssh-server > /dev/null 2>&1
 ## Generate SSH key
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa
 
+## Set up kubeadm cluster
+info "Setting up kubeadm cluster..."
+kubeadm init --cri-socket unix:///var/run/docker.sock
+
+## Set up cluster networking
+info "Setting up cluster networking..."
+kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+## Set up kubeconfig
+info "Setting up kubeconfig..."
+mkdir -p ~/.kube
+cp -i /etc/kubernetes/admin.conf ~/.kube/config
+chown $(id -u):$(id -g) ~/.kube/config
+chmod 600 ~/.kube/config
+
 ## Generate Join Command
 kubeadm token create --ttl 0 --print-join-command > ~/join-command.sh
 echo " --cri-socket unix:///var/run/docker.sock" >> ~/join-command.sh

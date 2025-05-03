@@ -25,10 +25,10 @@ LABEL_MAP = {
 # ----------------------- Threshold Configuration ------------------------------
 THRESHOLDS = {
     "cpu":         {"mid": 80, "high": 140},       # higer is better (seconds)
-    "gpu-vulkan":  {"low": 20, "mid": 60},         # higher is better (FPS)
-    "gpu-opengl":  {"low": 20, "mid": 60},
-    "gpu-cuda":    {"low": 20, "mid": 60},
-    "gpu-opencl":  {"low": 20, "mid": 60},
+    "vulkan-perf":  {"low": 20, "mid": 60},         # higher is better (FPS)
+    "opengl-perf":  {"low": 20, "mid": 60},
+    "cuda-perf":    {"low": 20, "mid": 60},
+    "opencl-perf":  {"low": 20, "mid": 60},
 }
 
 # ------------------------- Classification Logic -------------------------------
