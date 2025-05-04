@@ -186,10 +186,6 @@ main() {
     ./setup/join-hcn.sh
   fi
 
-  # Set up monitoring
-  info "Setting up monitoring..."
-  ./setup/setup-labelling.sh
-
   # Set up drivers
   info "Setting up drivers..."
   ./setup/setup-drivers.sh
