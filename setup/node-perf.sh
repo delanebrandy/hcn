@@ -31,6 +31,19 @@ if [[ -z "${HOME_DIR:-}" ]]; then
   exit 1
 fi
 
+UPDATE=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --update)
+      UPDATE=true
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
 DIR="$HOME_DIR"
 
 has_label() {
@@ -97,3 +110,7 @@ if has_label cuda; then
 fi
 
 info "Benchmarking complete!"
+
+if $UPDATE; then
+  ./static_labelling.py --node $(uname -n | tr '[:upper:]' '[:lower:]')
+fi
