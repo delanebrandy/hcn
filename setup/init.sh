@@ -179,6 +179,7 @@ info "Enabling and starting cri-dockerd services..."
 systemctl daemon-reload
 systemctl enable cri-docker.service
 systemctl enable --now cri-docker.socket
+systemctl start cri-docker.service
 
 ################################################################################
 # Verification

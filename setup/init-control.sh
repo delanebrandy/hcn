@@ -19,7 +19,7 @@ if [[ "$EUID" -ne 0 ]]; then
   error "Please run as root (e.g., sudo $0)"
   exit 1
 fi
-
+force=false
 #set --force flag
 if [[ "$1" == "--force" ]]; then
   info "Force flag detected, skipping WSL2 check."
@@ -48,10 +48,10 @@ fi
 info "Installing dependencies..."
 apt-get -yqq install openssh-server > /dev/null 2>&1
 
-./init.sh
+./setup/init.sh
 
 ## Generate SSH key
-ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa
+#ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa
 
 ## Set up kubeadm cluster
 info "Setting up kubeadm cluster..."

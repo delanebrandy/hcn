@@ -19,6 +19,11 @@ CONTROL_NODE=false
 NET_DRIVE=false
 NFS_PATH="/mnt/shared_drive"
 
+# Ensure the script is run as root with --preserve-env=PATH
+if (( EUID )); then
+  exec sudo --preserve-env=PATH,USER,HOME "$0" "$@"
+fi
+
 #Check for --control-node flag
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -36,10 +41,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Ensure the script is run as root with --preserve-env=PATH
-if (( EUID )); then
-  exec sudo --preserve-env=PATH,USER,HOME "$0" "$@"
-fi
 
 # Detect if running in WSL2
 wsl2() {
