@@ -117,19 +117,19 @@ else
   info "Bare metal environment detected. Checking GPU platform support..."
 
   if command -v clinfo &>/dev/null; then
-    info "✔ OpenCL supported"
+    info "OpenCL supported"
     kubectl label node "$NODE_NAME" opencl=true --overwrite
   fi
   if command -v nvidia-smi &>/dev/null; then
-    info "✔ CUDA supported"
+    info "CUDA supported"
     kubectl label node "$NODE_NAME" cuda=true --overwrite
   fi
   if command -v vulkaninfo &>/dev/null; then
-    info "✔ Vulkan supported"
+    info "Vulkan supported"
     kubectl label node "$NODE_NAME" vulkan=true --overwrite
   fi
   if command -v glxinfo &>/dev/null || command -v glxgears &>/dev/null; then
-    info "✔ OpenGL supported"
+    info "OpenGL supported"
     kubectl label node "$NODE_NAME" opengl=true --overwrite
   fi
 

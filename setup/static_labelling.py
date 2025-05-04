@@ -1,8 +1,7 @@
 # static_labeling.py
 # ------------------------------------------------------------------------------
-# Author: Delane Brandy
-# Description: Dynamic performance labeling of nodes in a HCN cluster
-#              Combines XML benchmark parsing with Kubernetes node labeling.
+# Final version: performance tiers only (low/mid/high) using cuda, vulkan, etc.
+# No raw scores, no platform summary, no gpu=cuda.
 # ------------------------------------------------------------------------------
 
 import json
@@ -10,9 +9,6 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 import subprocess
 import argparse
-import platform
-import shutil
-import os
 
 LABEL_MAP = {
     "build-linux-kernel": "cpu",
@@ -22,16 +18,14 @@ LABEL_MAP = {
     "juliagpu":           "gpu-opencl",
 }
 
-# ----------------------- Threshold Configuration ------------------------------
 THRESHOLDS = {
-    "cpu":         {"mid": 80, "high": 140},       # higer is better (seconds)
-    "vulkan-perf":  {"low": 20, "mid": 60},         # higher is better (FPS)
+    "cpu":         {"mid": 80, "high": 140},
+    "vulkan-perf":  {"low": 20, "mid": 60},
     "opengl-perf":  {"low": 20, "mid": 60},
     "cuda-perf":    {"low": 20, "mid": 60},
     "opencl-perf":  {"low": 20, "mid": 60},
 }
 
-# ------------------------- Classification Logic -------------------------------
 def classify(label, value):
     if label == "cpu":
         if value < THRESHOLDS[label]["high"]:
@@ -48,7 +42,6 @@ def classify(label, value):
         else:
             return "low"
 
-# ------------------------- Kubernetes Labeling --------------------------------
 def label_node(node, key, value):
     print(f"[kubectl] Labeling {node}: {key}={value}")
     subprocess.run(
@@ -56,10 +49,8 @@ def label_node(node, key, value):
         check=True
     )
 
-# ------------------------- Benchmark Parsing ----------------------------------
 def parse_results():
     results = {label: None for label in LABEL_MAP.values()}
-    platforms_supported = set()
 
     for xml in Path.home().glob(".phoronix-test-suite/test-results/*/composite.xml"):
         try:
@@ -67,24 +58,18 @@ def parse_results():
             test_id = root.findtext("Result/Identifier")
             if not test_id:
                 continue
-
             short = test_id.split("/")[-1]
-            base  = short.rsplit("-", 1)[0]           # "build-linux-kernel"
+            base = short.rsplit("-", 1)[0]
             label = LABEL_MAP.get(base)
             if not label:
                 continue
-
             value = float(root.findtext("Result/Data/Entry/Value"))
             results[label] = value
-            platforms_supported.add(label)
-
         except Exception as e:
             print(f"[!] Error parsing {xml}: {e}")
             continue
+    return results
 
-    return results, platforms_supported
-
-# --------------------------- System Info Detection ----------------------------
 def has_battery():
     try:
         power_devices = subprocess.check_output(["upower", "-e"]).decode().splitlines()
@@ -93,37 +78,45 @@ def has_battery():
         print(f"[WARN] Battery detection failed: {e}")
         return False
 
-# ------------------------------ Main Logic ------------------------------------
+def detect_storage_type():
+    try:
+        root_device = subprocess.check_output(["findmnt", "-n", "-o", "SOURCE", "/"]).decode().strip()
+        dev_name = root_device.replace("/dev/", "").rstrip("0123456789")
+
+        if dev_name.startswith("mmcblk"):
+            return "sdcard"
+        if "/loop" in root_device or "vhd" in root_device.lower():
+            return "virtual"
+
+        rotational_path = Path(f"/sys/block/{dev_name}/queue/rotational")
+        if rotational_path.exists():
+            with open(rotational_path) as f:
+                rotational = f.read().strip()
+                return "ssd" if rotational == "0" else "hdd"
+        return "unknown"
+    except Exception as e:
+        print(f"[WARN] Storage detection failed: {e}")
+        return "unknown"
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--node", required=True, help="Kubernetes node name")
     args = parser.parse_args()
-
     node = args.node
-    results, platforms = parse_results()
-
-    # Save raw parsed data
-    output_path = Path.home() / "hcn/node_performance.json"
-    with open(output_path, "w") as f:
-        json.dump({"node-performance": [results]}, f, indent=2)
-
-    print("node_performance.json written")
+    results = parse_results()
 
     for label, value in results.items():
         if value is None:
             print(f"[WARN] No result for {label}")
             continue
         perf_class = classify(label, value)
-        key = label.replace("gpu-", "gpu") if label.startswith("gpu-") else label
-        label_node(node, key, perf_class)
-
-    platforms_flat = [p.replace("gpu-", "") for p in platforms if p != "cpu"]
-    if platforms_flat:
-        platforms_string = ",".join(sorted(platforms_flat))
-        label_node(node, "platforms", platforms_string)
+        label_node(node, label, perf_class)
 
     has_batt = "true" if has_battery() else "false"
     label_node(node, "has-battery", has_batt)
+
+    storage_type = detect_storage_type()
+    label_node(node, "storage", storage_type)
 
 if __name__ == "__main__":
     main()

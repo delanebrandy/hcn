@@ -30,7 +30,7 @@ spec:
           value: "all"
       restartPolicy: Always
       nodeSelector:
-        gpu-cuda: high
+        cuda-perf: high
         cuda: "true"
 ---
 apiVersion: v1
