@@ -23,7 +23,7 @@ force=false
 #set --force flag
 if [[ "$1" == "--force" ]]; then
   info "Force flag detected, skipping WSL2 check."
-  $force=true
+  force=true
 fi
 
 # Start Message
@@ -55,22 +55,19 @@ apt-get -yqq install openssh-server > /dev/null 2>&1
 
 ## Set up kubeadm cluster
 info "Setting up kubeadm cluster..."
-kubeadm init --cri-socket unix:///var/run/docker.sock
+kubeadm init --cri-socket unix:///var/run/cri-dockerd.sock
+
+## Set up kubeconfig
+info "Setting up kubeconfig..."
+export KUBECONFIG=/etc/kubernetes/admin.conf
 
 ## Set up cluster networking
 info "Setting up cluster networking..."
 kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
 
-## Set up kubeconfig
-info "Setting up kubeconfig..."
-mkdir -p ~/.kube
-cp -i /etc/kubernetes/admin.conf ~/.kube/config
-chown $(id -u):$(id -g) ~/.kube/config
-chmod 600 ~/.kube/config
-
 ## Generate Join Command
 kubeadm token create --ttl 0 --print-join-command > ~/join-command.sh
-echo " --cri-socket unix:///var/run/docker.sock" >> ~/join-command.sh
+echo " --cri-socket unix:///var/run/cri-dockerd.sock" >> ~/join-command.sh
 chmod +x ~/join-command.sh
 
 ## Create NFS share if available
