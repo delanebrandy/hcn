@@ -199,7 +199,7 @@ main() {
   ./setup/node-perf.sh
 
   # Init static labelling
-  python3 setup/static_labelling.py --node $(uname -n)
+  python3 setup/static_labelling.py --node $(uname -n | tr '[:upper:]' '[:lower:]')
 
   # Init dynamic labelling
   info "Setting up dynamic labelling..."
