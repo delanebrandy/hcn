@@ -12,10 +12,10 @@ import argparse
 
 LABEL_MAP = {
     "build-linux-kernel": "cpu",
-    "vkmark":             "gpu-vulkan",
-    "unigine-heaven":     "gpu-opengl",
-    "octanebench":        "gpu-cuda",
-    "juliagpu":           "gpu-opencl",
+    "vkmark":             "vulkan-perf",
+    "unigine-heaven":     "opengl-perf",
+    "octanebench":        "cuda-perf",
+    "juliagpu":           "opencl-perf",
 }
 
 THRESHOLDS = {
