@@ -64,6 +64,6 @@ else
 fi
 
 #give worker role to the node
-kubectl label node "$HOSTNAME" node-role.kubernetes.io/worker=true --overwrite
+kubectl label node "${HOSTNAME,,}" node-role.kubernetes.io/worker=true --overwrite
 
 info "Node joined the HCN and is ready."

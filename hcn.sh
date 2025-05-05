@@ -2,9 +2,11 @@
 # -------------------------------------------------------------------------------
 # Author: Delane Brandy
 # Email:  d.brandy@se21.qmul.ac.uk
-# Script: EDIT
-# Description: EDIT
+# Script: hcn.sh
+# Description: Home Computing Network (HCN) setup script
 # -------------------------------------------------------------------------------
+
+# > /dev/null 2>&1: to suppress output - normally
 
 # Colors for log messages
 GREEN='\033[0;32m'
@@ -173,7 +175,7 @@ install-benchmarks() {
   fi
 
   info "Installing benchmark dependencies..."
-  apt install -yqq build-essential bison flex bc libssl-dev libelf-dev dwarves libncurses-dev
+  apt install -yqq build-essential bison flex bc libssl-dev libelf-dev dwarves libncurses-dev > /dev/null 2>&1
 }
 
 # Main Script Execution

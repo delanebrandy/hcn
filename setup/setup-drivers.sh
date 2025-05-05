@@ -2,8 +2,8 @@
 # ------------------------------------------------------------------------------
 # Author: Delane Brandy
 # Email:  d.brandy@se21.qmul.ac.uk
-# Script: EDIT
-# Description: EDIT
+# Script: setup-drivers.sh
+# Description: Install and configure GPU drivers for WSL2 or bare metal
 # ------------------------------------------------------------------------------
 
 set -euo pipefail
