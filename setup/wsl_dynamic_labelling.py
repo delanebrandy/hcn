@@ -3,6 +3,9 @@ import sys
 import json
 import psutil
 
+CPU_IDLE_THRESHOLD = 30
+CONTAINER_RATIO_THRESHOLD = 0.8
+
 NODE_NAME_CMD = ["hostname"]
 LABEL_CMD     = "kubectl label node {node} {key}={value} --overwrite"
 TAINT_CMD     = "kubectl taint node {node} {key}={value}:NoExecute --overwrite"
