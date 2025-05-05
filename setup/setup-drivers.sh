@@ -86,7 +86,7 @@ if is_wsl2; then
       mesa-vulkan-drivers mesa-utils vulkan-tools libglu1-mesa-dev  \
       nvidia-container-toolkit libvulkan1 pocl-opencl-icd > /dev/null 2>&1
 
-    kubectl label node "$NODE_NAME" cuda=true vulkan=true opengl=true --overwrite
+    kubectl label node "$NODE_NAME" cuda=true opengl=true --overwrite
 
     nvidia-ctk runtime configure --runtime=docker
 
@@ -105,7 +105,7 @@ if is_wsl2; then
       intel-opencl-icd intel-level-zero-gpu level-zero mesa-utils libgl1-mesa-glx   \
       mesa-vulkan-drivers vulkan-tools libglu1-mesa-dev freeglut3-dev mesa-common-dev clinfo > /dev/null 2>&1
 
-    kubectl label node "$NODE_NAME" opencl=true vulkan=true opengl=true --overwrite
+    kubectl label node "$NODE_NAME" opencl=true opengl=true --overwrite
     info "Intel GPU drivers installed. Please run: wsl --shutdown and re-run this script."
 
   else
