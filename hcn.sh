@@ -193,7 +193,7 @@ main() {
 
   # Run benchmarks
   info "Running benchmarks..."
-  ./setup/node-perf.sh
+  sudo -u "$HCN_ORIG_USER" -- ./setup/node-perf.sh
 
   # Init static labelling
   python3 setup/static_labelling.py --node $(uname -n | tr '[:upper:]' '[:lower:]')

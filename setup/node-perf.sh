@@ -21,16 +21,6 @@ info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-if [[ "$EUID" -ne 0 ]]; then
-  error "Please run as root (e.g., sudo $0)"
-  exit 1
-fi
-
-if [[ -z "${HOME_DIR:-}" ]]; then
-  error "Required environment variable(s) not set: HOME_DIR"
-  exit 1
-fi
-
 UPDATE=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -75,7 +65,7 @@ fi
 # ------------------------------------------------------------------------------
 
 # Initialise Phoronix Test Suite
-sudo -u "$HCN_ORIG_USER" phoronix-test-suite > /dev/null 2>&1
+phoronix-test-suite > /dev/null 2>&1
 
 info "Configuring Phoronix batch mode..."
 printf 'y\nn\nn\nn\nn\nn\nn\n' | phoronix-test-suite batch-setup
