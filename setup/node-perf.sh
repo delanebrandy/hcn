@@ -44,23 +44,6 @@ has_label() {
 info "Starting performance tests - expect high system load."
 
 # ------------------------------------------------------------------------------
-# Install Phoronix Test Suite
-# ------------------------------------------------------------------------------
-apt-get -yqq install php-cli php-xml unzip libelf-dev > /dev/null 2>&1
-if ! command -v phoronix-test-suite &> /dev/null; then
-  info "Installing Phoronix Test Suite..."
-  apt-get -yqq install wget > /dev/null 2>&1
-  wget https://github.com/phoronix-test-suite/phoronix-test-suite/releases/download/v10.8.4/phoronix-test-suite-10.8.4.tar.gz
-  tar -xf phoronix-test-suite-10.8.4.tar.gz
-  cd phoronix-test-suite
-  ./install-sh
-  cd ..
-  rm -rf phoronix-test-suite*
-else
-  info "Phoronix Test Suite already installed."
-fi
-
-# ------------------------------------------------------------------------------
 # Configure Phoronix Batch Mode
 # ------------------------------------------------------------------------------
 
@@ -87,7 +70,7 @@ phoronix-test-suite batch-benchmark build-linux-kernel <<< 1
 info "Running GPU benchmarks (if supported)..."
 
 if has_label opengl; then
-  phoronix-test-suite batch-benchmark unigine-heaven
+  printf "11\n1\n" | phoronix-test-suite batch-benchmark unigine-heaven
 fi
 if has_label opencl; then
   phoronix-test-suite batch-benchmark juliagpu  ##blender inteloptic
