@@ -32,7 +32,6 @@ info "Starting performance tests – expect high system load."
 # Detect Environment (WSL2 or Bare Metal) and GPU Platform Support
 # ------------------------------------------------------------------------------
 
-SUPPORTED_PLATFORMS=()
 
 is_wsl2() {
   grep -qi "microsoft" /proc/sys/kernel/osrelease
@@ -130,11 +129,5 @@ else
   if command -v glxinfo &>/dev/null || command -v glxgears &>/dev/null; then
     info "OpenGL supported"
     kubectl label node "$NODE_NAME" opengl=true --overwrite
-  fi
-
-  if [[ ${#SUPPORTED_PLATFORMS[@]} -eq 0 ]]; then
-    warn "No GPU platforms detected - GPU benchmarks will be skipped."
-  else
-    info "Detected GPU platforms: ${SUPPORTED_PLATFORMS[*]}"
   fi
 fi
