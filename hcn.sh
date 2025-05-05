@@ -171,6 +171,9 @@ install-benchmarks() {
   else
     info "Phoronix Test Suite already installed."
   fi
+
+  info "Installing benchmark dependencies..."
+  apt install -yqq build-essential bison flex bc libssl-dev libelf-dev dwarves libncurses-dev
 }
 
 # Main Script Execution
