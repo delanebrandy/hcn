@@ -73,10 +73,10 @@ if has_label opengl; then
   printf "11\n1\n" | phoronix-test-suite batch-benchmark unigine-heaven
 fi
 if has_label opencl; then
-  phoronix-test-suite batch-benchmark juliagpu  ##blender inteloptic
+  phoronix-test-suite batch-benchmark juliagpu
 fi
 if has_label vulkan; then
-  phoronix-test-suite batch-benchmark vkmark
+  phoronix-test-suite batch-benchmark vkpeak
 fi
 if has_label cuda; then
   phoronix-test-suite batch-benchmark octanebench
