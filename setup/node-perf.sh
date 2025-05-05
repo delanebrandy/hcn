@@ -59,8 +59,10 @@ sed -i 's|<DynamicRunCount>TRUE</DynamicRunCount>|<DynamicRunCount>FALSE</Dynami
 # ------------------------------------------------------------------------------
 
 info "Running CPU benchmarks..."
-phoronix-test-suite batch-benchmark build-linux-kernel <<< 1
-#phoronix-test-suite batch-benchmark ffmpeg <<< 1
+timeout 1h phoronix-test-suite batch-benchmark build-linux-kernel <<< 1
+if [ $STATUS -eq 124 ]; then
+  kubectl label node "${HOSTNAME,,}" cpu=low --overwrite
+fi
 
 # ------------------------------------------------------------------------------
 # Run GPU Benchmarks (Conditional)
@@ -69,16 +71,32 @@ phoronix-test-suite batch-benchmark build-linux-kernel <<< 1
 info "Running GPU benchmarks (if supported)..."
 
 if has_label opengl; then
-  printf "11\n1\n" | phoronix-test-suite batch-benchmark unigine-heaven
+  timeout 1h printf "11\n1\n" | phoronix-test-suite batch-benchmark unigine-heaven
+  STATUS=$?
+  if [ $STATUS -eq 124 ]; then
+  kubectl label node "${HOSTNAME,,}" opengl-perf=low --overwrite
+  fi
 fi
 if has_label opencl; then
-  phoronix-test-suite batch-benchmark juliagpu
+  timeout 1h phoronix-test-suite batch-benchmark juliagpu
+  STATUS=$?
+  if [ $STATUS -eq 124 ]; then
+  kubectl label node "${HOSTNAME,,}" opencl-perf=low --overwrite
+  fi
 fi
 if has_label vulkan; then
-  phoronix-test-suite batch-benchmark vkpeak
+  timeout 1h phoronix-test-suite batch-benchmark vkpeak
+  STATUS=$?
+  if [ $STATUS -eq 124 ]; then
+  kubectl label node "${HOSTNAME,,}" vulkan-perf=low --overwrite
+  fi
 fi
 if has_label cuda; then
-  phoronix-test-suite batch-benchmark octanebench
+  timeout 1h phoronix-test-suite batch-benchmark octanebench
+  STATUS=$?
+  if [ $STATUS -eq 124 ]; then
+  kubectl label node "${HOSTNAME,,}" cuda-perf=low --overwrite
+  fi
 fi
 
 info "Benchmarking complete!"
