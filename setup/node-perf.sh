@@ -2,8 +2,9 @@
 # ------------------------------------------------------------------------------
 # Author: Delane Brandy
 # Email:  d.brandy@se21.qmul.ac.uk
-# Script: EDIT
-# Description: EDIT
+# Script: node-perf.sh
+# Description: Run performance tests on a node using Phoronix Test Suite
+# Usage: ./node-perf.sh [--update]
 # ------------------------------------------------------------------------------
 
 set -euo pipefail

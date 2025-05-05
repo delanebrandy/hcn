@@ -2,8 +2,8 @@
 # ------------------------------------------------------------------------------
 # Author: Delane Brandy
 # Email:  d.brandy@se21.qmul.ac.uk
-# Script: EDIT
-# Description: EDIT
+# Script: init-control.sh
+# Description: Initializes the control plane for the Home Computing Network (HCN).
 # ------------------------------------------------------------------------------
 
 # Colors for log messages
@@ -70,5 +70,6 @@ kubeadm token create --ttl 0 --print-join-command > ~/join-command.sh
 echo " --cri-socket unix:///var/run/cri-dockerd.sock" >> ~/join-command.sh
 chmod +x ~/join-command.sh
 
+kubectl label node "$HOSTNAME" node-role.kubernetes.io/control-plane=true --overwrite
 ## Create NFS share if available
 ../storage/setup-storage.sh

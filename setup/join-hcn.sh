@@ -32,7 +32,7 @@ SSH_UNAME="$HCN_SSH_UNAME"
 
 info "Connecting to control node at $IP_ADDRESS as $SSH_UNAME..."
 info "Fetching join script..."
-scp -i $KEY_FILE "$SSH_UNAME@$IP_ADDRESS:~/join-command.sh" /tmp/join.sh  
+scp -i $KEY_FILE "$SSH_UNAME@$IP_ADDRESS:~/join-command.sh" /tmp/join.sh
 chmod +x /tmp/join.sh
 
 info "Running join script..."
@@ -62,5 +62,8 @@ else
   error "Node is not ready."
   exit 1
 fi
+
+#give worker role to the node
+kubectl label node "$HOSTNAME" node-role.kubernetes.io/worker=true --overwrite
 
 info "Node joined the HCN and is ready."

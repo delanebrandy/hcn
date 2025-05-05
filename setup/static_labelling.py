@@ -1,6 +1,6 @@
 # static_labeling.py
 # ------------------------------------------------------------------------------
-# Final version: performance tiers only (low/mid/high) using cuda, vulkan, etc.
+# Performance tiers only (low/mid/high) using cuda, vulkan, etc.
 # No raw scores, no platform summary, no gpu=cuda.
 # ------------------------------------------------------------------------------
 
@@ -21,7 +21,7 @@ LABEL_MAP = {
 THRESHOLDS = {
     "cpu":         {"mid": 80, "high": 140},
     "vulkan-perf":  {"low": 20, "mid": 60},
-    "opengl-perf":  {"low": 20, "mid": 60},
+    "opengl-perf":  {"low": 40, "mid": 100},
     "cuda-perf":    {"low": 20, "mid": 60},
     "opencl-perf":  {"low": 20, "mid": 60},
 }

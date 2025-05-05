@@ -1,6 +1,7 @@
 import subprocess
 import sys
 import json
+import psutil
 
 NODE_NAME_CMD = ["hostname"]
 LABEL_CMD     = "kubectl label node {node} {key}={value} --overwrite"
@@ -42,6 +43,19 @@ def has_taint(node: str, key: str, value: str, effect: str = "NoExecute") -> boo
         print(f"[Labeler] Error fetching taints: {e}", file=sys.stderr)
     return False
 
+def is_user_load_present(vmem_cpu, container_ratio_threshold=CONTAINER_RATIO_THRESHOLD):
+    container_sum = 0.0
+    for proc in psutil.process_iter(['name','cpu_percent']):
+        try:
+            cpu = proc.info['cpu_percent']
+            name = (proc.info['name'] or '').lower()
+            if any(x in name for x in ['docker','dockerd','containerd','shim','runc','cri-dockerd']):
+                container_sum += cpu
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+    container_ratio = container_sum / vmem_cpu if vmem_cpu else 0
+    return container_ratio <= container_ratio_threshold
+
 def main():
     node = get_node_name()
     print(f"[Labeler] Target node: {node}", file=sys.stderr)
@@ -53,17 +67,16 @@ def main():
             parts = dict(item.split("=", 1) for item in line.split())
             idle = parts.get("idle") == "true"
             power_ok = parts.get("power_ok") == "true"
+            vmem_cpu = float(parts.get("vmem_cpu", "0"))
 
-            if idle and power_ok:
-                print("[Labeler] idle & power OK: labeling idle=true", file=sys.stderr)
-                label_node(node, "idle", "true")
-                # only remove taint if present
-                if has_taint(node, "idle", "false"):
-                    print("[Labeler] removing idle=false taint", file=sys.stderr)
-                    untaint_node(node, "idle", "false")
-            else:
-                print("[Labeler] busy or on battery: tainting idle=false", file=sys.stderr)
+            if not idle or not power_ok:
                 taint_node(node, "idle", "false")
+            elif vmem_cpu > CPU_IDLE_THRESHOLD and is_user_load_present(vmem_cpu):
+                taint_node(node, "idle", "false")
+            else:
+                label_node(node, "idle", "true")
+                if has_taint(node, "idle", "false"):
+                    untaint_node(node, "idle", "false")
 
         except Exception as e:
             print(f"[Labeler] failed to parse or apply: {e}", file=sys.stderr)

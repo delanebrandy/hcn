@@ -15,13 +15,11 @@ SAMPLE_INTERVAL = 30
 def get_node_name():
     return subprocess.check_output(NODE_NAME_CMD).decode().strip().lower()
 
-
 def is_plugged_in_and_sufficient():
     battery = psutil.sensors_battery()
     if battery is None:
         return True
     return battery.power_plugged or battery.percent >= BATTERY_THRESHOLD
-
 
 def is_cpu_idle():
     usage = psutil.cpu_percent(interval=1)
@@ -59,6 +57,26 @@ def untaint_node(node, key, value):
     cmd = UNTAINT_CMD.format(node=node, key=key, value=value).split()
     subprocess.run(cmd, check=True)
 
+def is_user_load_present(total_threshold=30, container_ratio_threshold=0.8):
+
+    total_cpu = psutil.cpu_percent(interval=1)
+
+    if total_cpu < total_threshold:
+        return False
+
+    container_sum = 0.0
+    for proc in psutil.process_iter(['name', 'cpu_percent']):
+        try:
+            cpu = proc.info['cpu_percent']
+            name = proc.info['name'].lower() or ''
+            if any(x in name for x in ['docker', 'dockerd', 'containerd', 'shim', 'runc', 'cri-dockerd']):
+                container_sum += cpu
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+
+    container_ratio = container_sum / total_cpu if total_cpu > 0 else 0
+    return container_ratio <= container_ratio_threshold
+
 def monitor():
     node = get_node_name()
     print(f"[Monitor] Monitoring node: {node}")
@@ -67,7 +85,7 @@ def monitor():
         idle = is_cpu_idle()
         power_ok = is_plugged_in_and_sufficient()
         try:
-            if idle and power_ok:
+            if idle and power_ok and not is_user_load_present():
                 print("[Monitor] Node is idle and power OK — applying label idle=true and removing previous idle=false taint if present")
                 label_node(node, "idle", "true")
                 if has_taint(node, "idle", "false"):
