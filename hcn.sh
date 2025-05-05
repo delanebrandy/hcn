@@ -188,7 +188,7 @@ main() {
   apt-get -yqq upgrade > /dev/null 2>&1
 
   info "Installing dependencies..."
-  apt-get -yqq install sshpass clinfo upower iptables > /dev/null 2>&1
+  apt-get -yqq install sshpass clinfo upower iptables avahi-daemon libnss-mdns > /dev/null 2>&1
 
   info "Installing Python dependencies…"
   apt-get -yqq install python3 python3-pip python3-venv python3-psutil > /dev/null 2>&1
@@ -197,6 +197,7 @@ main() {
   # Run node setup
   info "Running node setup..."
   if $CONTROL_NODE; then
+    save_info
     ./setup/init-control.sh
   else
     ssh_setup
