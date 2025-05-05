@@ -34,8 +34,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-DIR="$HOME_DIR"
-
 has_label() {
   kubectl get node "${HOSTNAME,,}" \
     -o jsonpath="{.metadata.labels.$1}" 2>/dev/null | grep -qx true
@@ -53,7 +51,7 @@ phoronix-test-suite > /dev/null 2>&1
 info "Configuring Phoronix batch mode..."
 printf 'y\nn\nn\nn\nn\nn\nn\n' | phoronix-test-suite batch-setup
 
-sed -i 's|<DynamicRunCount>TRUE</DynamicRunCount>|<DynamicRunCount>FALSE</DynamicRunCount>|' $DIR/.phoronix-test-suite/user-config.xml
+sed -i 's|<DynamicRunCount>TRUE</DynamicRunCount>|<DynamicRunCount>FALSE</DynamicRunCount>|' $HOME/.phoronix-test-suite/user-config.xml
 
 # ------------------------------------------------------------------------------
 # Run CPU Benchmarks
