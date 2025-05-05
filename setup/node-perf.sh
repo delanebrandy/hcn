@@ -87,7 +87,7 @@ sed -i 's|<DynamicRunCount>TRUE</DynamicRunCount>|<DynamicRunCount>FALSE</Dynami
 # ------------------------------------------------------------------------------
 
 info "Running CPU benchmarks..."
-phoronix-test-suite batch-benchmark build-linux-kernel <<< 1
+sudo -u "$HCN_ORIG_USER" phoronix-test-suite batch-benchmark build-linux-kernel <<< 1
 #phoronix-test-suite batch-benchmark ffmpeg <<< 1
 
 # ------------------------------------------------------------------------------
@@ -97,16 +97,16 @@ phoronix-test-suite batch-benchmark build-linux-kernel <<< 1
 info "Running GPU benchmarks (if supported)..."
 
 if has_label opengl; then
-  phoronix-test-suite batch-benchmark unigine-heaven
+  sudo -u "$HCN_ORIG_USER" phoronix-test-suite batch-benchmark unigine-heaven
 fi
 if has_label opencl; then
-  phoronix-test-suite batch-benchmark juliagpu  ##blender inteloptic
+  sudo -u "$HCN_ORIG_USER" phoronix-test-suite batch-benchmark juliagpu  ##blender inteloptic
 fi
 if has_label vulkan; then
-  phoronix-test-suite batch-benchmark vkmark
+  sudo -u "$HCN_ORIG_USER" phoronix-test-suite batch-benchmark vkmark
 fi
 if has_label cuda; then
-  phoronix-test-suite batch-benchmark octanebench
+  sudo -u "$HCN_ORIG_USER" phoronix-test-suite batch-benchmark octanebench
 fi
 
 info "Benchmarking complete!"
