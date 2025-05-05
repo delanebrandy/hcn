@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 import subprocess
 import argparse
+import re
 
 LABEL_MAP = {
     "build-linux-kernel": "cpu",
@@ -28,9 +29,9 @@ THRESHOLDS = {
 
 def classify(label, value):
     if label == "cpu":
-        if value < THRESHOLDS[label]["high"]:
+        if value > THRESHOLDS[label]["high"]:
             return "high"
-        elif value < THRESHOLDS[label]["mid"]:
+        elif value > THRESHOLDS[label]["mid"]:
             return "mid"
         else:
             return "low"
@@ -80,20 +81,30 @@ def has_battery():
 
 def detect_storage_type():
     try:
-        root_device = subprocess.check_output(["findmnt", "-n", "-o", "SOURCE", "/"]).decode().strip()
-        dev_name = root_device.replace("/dev/", "").rstrip("0123456789")
+        root_device = (
+            subprocess.check_output(
+                ["findmnt", "-n", "-o", "SOURCE", "/"]
+            )
+            .decode()
+            .strip()
+        )
+        dev_name = Path(root_device).name
 
-        if dev_name.startswith("mmcblk"):
+        if re.match(r".*p\d+$", dev_name):
+            base = re.sub(r"p\d+$", "", dev_name)
+        else:
+            base = re.sub(r"\d+$", "", dev_name)
+
+        if base.startswith("mmcblk"):
             return "sdcard"
-        if "/loop" in root_device or "vhd" in root_device.lower():
+        if dev_name.startswith("loop") or "vhd" in root_device.lower():
             return "virtual"
-
-        rotational_path = Path(f"/sys/block/{dev_name}/queue/rotational")
+        rotational_path = Path(f"/sys/block/{base}/queue/rotational")
         if rotational_path.exists():
-            with open(rotational_path) as f:
-                rotational = f.read().strip()
-                return "ssd" if rotational == "0" else "hdd"
+            with rotational_path.open() as f:
+                return "ssd" if f.read().strip() == "0" else "hdd"
         return "unknown"
+
     except Exception as e:
         print(f"[WARN] Storage detection failed: {e}")
         return "unknown"
