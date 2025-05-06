@@ -21,6 +21,7 @@ spec:
       nodeSelector:
         kubernetes.io/arch: amd64
         cpu: high
+        distccd: "true"
       containers:
       - name: distccd
         image: registry/distccd-amd64-cross:latest

@@ -19,6 +19,7 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/arch: arm64
+        distccd: "true"
       containers:
       - name: distccd
         image: registry/distccd-arm64-native:latest

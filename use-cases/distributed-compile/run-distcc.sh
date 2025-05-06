@@ -13,16 +13,14 @@ NC='\033[0m'
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-REGISTRY=$(kubectl get svc registry -n registry -o jsonpath='{.spec.clusterIP}')
 SUB_URL="$(kubectl get nodes -o wide | grep 'control-plane' | awk '{print $6}'):30000"
 PORT=5000
-REG_URL="${REGISTRY}:${PORT}"
 
 info "Adding registry to Docker daemon..."
-if ! grep -q "${REG_URL}" /etc/docker/daemon.json; then
+if ! grep -q "${SUB_URL}" /etc/docker/daemon.json; then
     echo "Adding registry to Docker daemon..."
     sudo mkdir -p /etc/docker
-    echo "{ \"insecure-registries\": [\"${REG_URL}\", \"${SUB_URL}\"] }" | sudo tee /etc/docker/daemon.json
+    echo "{ \"insecure-registries\": [\"${SUB_URL}\", \"${SUB_URL}\"] }" | sudo tee /etc/docker/daemon.json
     sudo systemctl restart docker
 else
     info "Registry already added to Docker daemon."
@@ -35,10 +33,6 @@ docker run --rm --privileged tonistiigi/binfmt --install all
 info "Setting registry credentials..."
 
 cat > buildkitd.toml <<EOF
-[registry."${REG_URL}"]
-http = true
-insecure = true
-
 [registry."${SUB_URL}"]
 http = true
 insecure = true
@@ -53,20 +47,18 @@ docker buildx inspect --bootstrap
 
 
 info "Building arm64 native distccd image..."
-docker buildx build --platform linux/arm64 -t ${REG_URL}/distccd-arm64-native:latest -f Dockerfile.native --output type=registry .
+docker buildx build --platform linux/arm64 -t ${SUB_URL}/distccd-arm64-native:latest -f Dockerfile.native --output type=registry .
 
 info "Building amd64 native distccd image..."
-docker buildx build --platform linux/amd64 -t ${REG_URL}/distccd-amd64-native:latest -f Dockerfile.native --output type=registry .
+docker buildx build --platform linux/amd64 -t ${SUB_URL}/distccd-amd64-native:latest -f Dockerfile.native --output type=registry .
 
 info "Building amd64-cross (amd64 target) distccd image..."
-docker build --platform linux/amd64 -t ${REG_URL}/distccd-amd64-cross:latest -f Dockerfile.cross .
-docker push ${REG_URL}/distccd-amd64-cross:latest
+docker build --platform linux/amd64 -t ${SUB_URL}/distccd-amd64-cross:latest -f Dockerfile.cross .
+docker push ${SUB_URL}/distccd-amd64-cross:latest
 
 info "All relevant distccd images have been built and pushed."
 
 info "Deploying distccd DaemonSets..."
-
-SUB_URL="$(hostname -I | awk '{print $1}'):30000"
 
 info "Replacing placeholder 'registry' with ${SUB_URL} in all DaemonSet yamls…"
 sed -i "s|registry|${SUB_URL}|g" distccd-*.yaml
