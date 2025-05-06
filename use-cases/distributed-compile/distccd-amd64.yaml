@@ -26,7 +26,7 @@ spec:
         command: ["distccd"]
         args:
           - "--no-detach"
-          - "--allow=10.0.0.0/8"
+          - "--allow=0.0.0.0/0"
         ports:
         - containerPort: 3632
           hostPort: 3632
