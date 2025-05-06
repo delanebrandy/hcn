@@ -14,7 +14,7 @@ info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
 REGISTRY=$(kubectl get svc registry -n registry -o jsonpath='{.spec.clusterIP}')
-SUB_URL="$(hostname -I | awk '{print $1}'):30000"
+SUB_URL="$(kubectl get nodes -o wide | grep 'control-plane' | awk '{print $6}'):30000"
 PORT=5000
 REG_URL="${REGISTRY}:${PORT}"
 
