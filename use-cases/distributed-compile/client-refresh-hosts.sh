@@ -12,7 +12,7 @@ NAMESPACE="devtools"
 ARM64_LABEL_SELECTOR="app=distcc,role in (arm64-native,arm64-cross)"
 AMD64_LABEL_SELECTOR="app=distcc,role=amd64-native"
 CONNECTIONS_PER_NODE=4
-HOSTS_FILE="$HOME_DIR/.distcc/hosts"
+HOSTS_FILE="/etc/distcc/hosts"
 
 # Colors
 GREEN='\033[0;32m'

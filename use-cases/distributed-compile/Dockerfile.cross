@@ -6,7 +6,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq && \
 
 # Point distccd to the aarch64 cross compiler
 ENV PATH="/usr/aarch64-linux-gnu/bin:/usr/bin:$PATH"
-ENV ALLOW=10.0.0.0/8
+ENV ALLOW=0.0.0.0/0
 
 RUN useradd --no-create-home distcc
 USER distcc
