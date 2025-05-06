@@ -29,12 +29,12 @@ else
 fi
 
 info "Configuring buildx"
-if ! docker buildx inspect --bootstrap; then
-    docker run --rm --privileged tonistiigi/binfmt --install all
 
-    info "Setting registry credentials..."
+docker run --rm --privileged tonistiigi/binfmt --install all
 
-    cat > buildkitd.toml <<EOF
+info "Setting registry credentials..."
+
+cat > buildkitd.toml <<EOF
 [registry."${REG_URL}"]
 http = true
 insecure = true
@@ -46,13 +46,11 @@ EOF
 
 echo "Generated buildkitd.toml"
 
-    info "Creating new buildx builder..."
-    docker buildx create --name multiarch --config ./buildkitd.toml --use
-    docker buildx use multiarch
-    docker buildx inspect --bootstrap
-else
-    info "Using existing buildx builder."
-fi
+info "Creating new buildx builder..."
+docker buildx create --name multiarch --config ./buildkitd.toml --use
+docker buildx use multiarch
+docker buildx inspect --bootstrap
+
 
 info "Building arm64 native distccd image..."
 docker buildx build --platform linux/arm64 -t ${REG_URL}/distccd-arm64-native:latest -f Dockerfile.native --output type=registry .
