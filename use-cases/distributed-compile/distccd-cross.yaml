@@ -24,7 +24,7 @@ spec:
         distccd: "true"
       containers:
       - name: distccd
-        image: registry/distccd-amd64-cross:latest
+        image: 192.168.0.104:30000/distccd-amd64-cross:latest
         command: ["distccd"]
         args:
           - "--no-detach"

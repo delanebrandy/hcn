@@ -1,7 +1,7 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq && \
-    apt-get install -y -qq distcc gcc g++ clang && \
+    apt-get install -y -qq distcc gcc g++ clang bash && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV ALLOW=0.0.0.0/0
@@ -11,4 +11,4 @@ USER distcc
 
 EXPOSE 3632
 
-CMD ["distccd","--no-detach","--daemon","--jobs","$(nproc)","--allow","${ALLOW}","--log-stderr"]
+CMD ["bash","-lc","exec distccd --no-detach --daemon --jobs $(nproc) --allow ${ALLOW} --log-stderr"]

@@ -16,36 +16,6 @@ error() { echo -e "${RED}[ERROR]${NC} $*"; }
 SUB_URL="$(kubectl get nodes -o wide | grep 'control-plane' | awk '{print $6}'):30000"
 PORT=5000
 
-info "Adding registry to Docker daemon..."
-if ! grep -q "${SUB_URL}" /etc/docker/daemon.json; then
-    echo "Adding registry to Docker daemon..."
-    sudo mkdir -p /etc/docker
-    echo "{ \"insecure-registries\": [\"${SUB_URL}\", \"${SUB_URL}\"] }" | sudo tee /etc/docker/daemon.json
-    sudo systemctl restart docker
-else
-    info "Registry already added to Docker daemon."
-fi
-
-info "Configuring buildx"
-
-docker run --rm --privileged tonistiigi/binfmt --install all
-
-info "Setting registry credentials..."
-
-cat > buildkitd.toml <<EOF
-[registry."${SUB_URL}"]
-http = true
-insecure = true
-EOF
-
-echo "Generated buildkitd.toml"
-
-info "Creating new buildx builder..."
-docker buildx create --name multiarch --config ./buildkitd.toml --use
-docker buildx use multiarch
-docker buildx inspect --bootstrap
-
-
 info "Building arm64 native distccd image..."
 docker buildx build --platform linux/arm64 -t ${SUB_URL}/distccd-arm64-native:latest -f Dockerfile.native --output type=registry .
 

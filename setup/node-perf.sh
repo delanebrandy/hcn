@@ -60,6 +60,7 @@ sed -i 's|<DynamicRunCount>TRUE</DynamicRunCount>|<DynamicRunCount>FALSE</Dynami
 
 info "Running CPU benchmarks..."
 timeout 1h phoronix-test-suite batch-benchmark build-linux-kernel <<< 1
+STATUS=$?
 if [ $STATUS -eq 124 ]; then
   kubectl label node "${HOSTNAME,,}" cpu=low --overwrite
 fi
